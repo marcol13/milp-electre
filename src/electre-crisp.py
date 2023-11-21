@@ -20,7 +20,7 @@ class CrispArray:
 
         return score_dict[pref_a][relations[rel]]
 
-    def solve(self, verbose=False):
+    def solve(self, verbose=False, visualize=True):
         prob = LpProblem("max support", LpMinimize)
         
         r = self.create_variable_matrix("r")
@@ -66,8 +66,19 @@ class CrispArray:
 
             print(f"Objective function: {prob.objective}")
 
-arr = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]], dtype=np.uint8)
-a = CrispArray(arr)
-a.solve(verbose=True)
+        if(visualize):
+            vars = np.array([x.name.split("_") + [x.varValue] for x in prob.variables()])
+            rels = list(set(vars[:,0]))
+            matrices = defaultdict(lambda: np.eye(self.s_a[0]), {rel: np.eye(self.s_a[0]) for rel in rels})
 
-# visualize_ranking(arr)
+            for rel, i, j, value in vars:
+                matrices[rel][int(i)][int(j)] = value
+
+            visualize_ranking(matrices["r"])
+
+# arr = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]], dtype=np.uint8)
+# arr = np.array([[1, 0, 0], [0, 1, 0], [1, 0, 1]], dtype=np.uint8)
+arr = np.array([[1,1,1,0,1,1,1,1,1,1],[0,1,0,0,1,1,1,0,1,1],[0,0,1,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,1],[0,1,1,0,1,1,1,0,0,1],[0,1,0,0,1,1,0,1,1,1],[0,1,0,0,1,0,0,0,1,1],[0,0,0,0,1,0,0,0,0,1]], dtype=np.uint8)
+visualize_ranking(arr)
+a = CrispArray(arr)
+a.solve(verbose=True, visualize=True)
