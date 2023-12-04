@@ -20,7 +20,7 @@ class CrispArray:
 
         return score_dict[pref_a][relations[rel]]
 
-    def solve(self, verbose=False, visualize=True):
+    def solve_partial(self, verbose=False, visualize=True):
         prob = LpProblem("max support", LpMinimize)
         
         r = self.create_variable_matrix("r")
@@ -76,9 +76,59 @@ class CrispArray:
 
             visualize_ranking(matrices["r"])
 
+    def solve_complete(self, verbose=False, visualize=True):
+        prob = LpProblem("max support", LpMinimize)
+        
+        r = self.create_variable_matrix("r")
+        rel_z = self.create_variable_matrix("Z")
+
+        prob += lpSum([r[i][k] * self.distance_func(self.matrix_a, 0, i, k) + r[k][i] * self.distance_func(self.matrix_a, 1, i, k) + rel_z[i][k] * (self.distance_func(self.matrix_a, 2, i, k) - self.distance_func(self.matrix_a, 0, i, k) - self.distance_func(self.matrix_a, 1, i, k))  for i, k in product(range(self.s_a[0]), range(self.s_a[1])) if i < k])
+
+        for i in range(self.s_a[0]):
+            for k in range(self.s_a[1]):
+                if i != k:
+                    prob += r[i][k] + r[k][i] >= 1, f"Weak preference {i}-{k}"
+                    prob += rel_z[i][k] == r[i][k] + r[k][i] - 1, f"Incomparability {i}-{k}"
+
+        for t_i, t_k, t_p in product(range(self.s_a[0]), range(self.s_a[0]), range(self.s_a[0])):
+            if t_i != t_k and t_k != t_p and t_i != t_p:
+                prob += r[t_i][t_k] >= r[t_i][t_p] + r[t_p][t_k] - 1.5, f"Transition {t_i}-{t_k}-{t_p}"
+            
+        prob.solve()
+
+        if(verbose):
+            print("Status:", LpStatus[prob.status])
+            print()
+
+            vars = np.array([x.name.split("_") + [x.varValue] for x in prob.variables()])
+            rels = list(set(vars[:,0]))
+            matrices = defaultdict(lambda: np.eye(self.s_a[0]), {rel: np.eye(self.s_a[0]) for rel in rels})
+
+            for rel, i, j, value in vars:
+                matrices[rel][int(i)][int(j)] = value
+
+            for key in matrices.keys():
+                print(f"Matrix {key}:")
+                print(matrices[key])
+                print()
+
+            print(f"Objective function: {prob.objective}")
+
+        if(visualize):
+            vars = np.array([x.name.split("_") + [x.varValue] for x in prob.variables()])
+            rels = list(set(vars[:,0]))
+            matrices = defaultdict(lambda: np.eye(self.s_a[0]), {rel: np.eye(self.s_a[0]) for rel in rels})
+
+            for rel, i, j, value in vars:
+                matrices[rel][int(i)][int(j)] = value
+
+            visualize_ranking(matrices["r"])
+
 # arr = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]], dtype=np.uint8)
 # arr = np.array([[1, 0, 0], [0, 1, 0], [1, 0, 1]], dtype=np.uint8)
+# arr = np.array([[1, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [1, 0, 0, 0, 1]], dtype=np.uint8)
 arr = np.array([[1,1,1,0,1,1,1,1,1,1],[0,1,0,0,1,1,1,0,1,1],[0,0,1,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,1],[0,1,1,0,1,1,1,0,0,1],[0,1,0,0,1,1,0,1,1,1],[0,1,0,0,1,0,0,0,1,1],[0,0,0,0,1,0,0,0,0,1]], dtype=np.uint8)
 visualize_ranking(arr)
 a = CrispArray(arr)
-a.solve(verbose=True, visualize=True)
+a.solve_partial(verbose=True, visualize=True)
+a.solve_complete(verbose=True, visualize=True)
