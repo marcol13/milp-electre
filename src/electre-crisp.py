@@ -46,6 +46,10 @@ class CrispArray:
             if t_i != t_k and t_k != t_p and t_i != t_p:
                 prob += r[t_i][t_k] >= r[t_i][t_p] + r[t_p][t_k] - 1.5, f"Transition {t_i}-{t_k}-{t_p}"
             
+
+        print("HAHAHA")
+        print(prob)
+        
         prob.solve()
 
         if(verbose):
@@ -124,10 +128,10 @@ class CrispArray:
 
             visualize_ranking(matrices["r"])
 
-# arr = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]], dtype=np.uint8)
+arr = np.array([[1, 1, 0], [0, 1, 1], [1, 0, 1]], dtype=np.uint8)
 # arr = np.array([[1, 0, 0], [0, 1, 0], [1, 0, 1]], dtype=np.uint8)
 # arr = np.array([[1, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 0, 1, 1, 0], [0, 0, 0, 1, 1], [1, 0, 0, 0, 1]], dtype=np.uint8)
-arr = np.array([[1,1,1,0,1,1,1,1,1,1],[0,1,0,0,1,1,1,0,1,1],[0,0,1,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,1],[0,1,1,0,1,1,1,0,0,1],[0,1,0,0,1,1,0,1,1,1],[0,1,0,0,1,0,0,0,1,1],[0,0,0,0,1,0,0,0,0,1]], dtype=np.uint8)
+# arr = np.array([[1,1,1,0,1,1,1,1,1,1],[0,1,0,0,1,1,1,0,1,1],[0,0,1,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0],[0,0,0,0,1,1,0,0,0,1],[0,1,1,0,1,1,1,0,0,1],[0,1,0,0,1,1,0,1,1,1],[0,1,0,0,1,0,0,0,1,1],[0,0,0,0,1,0,0,0,0,1]], dtype=np.uint8)
 visualize_ranking(arr)
 a = CrispArray(arr)
 a.solve_partial(verbose=True, visualize=True)
