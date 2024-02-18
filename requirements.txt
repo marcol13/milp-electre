@@ -1,0 +1,4 @@
+# TODO add profiles
+numpy===1.26.4
+mcda===0.6.1
+pulp===2.8.0
