@@ -1,5 +1,6 @@
 import numpy as np
 
+# Make factory class
 class CredibilityMatrix:
     def __init__(self, matrix: np.ndarray):
         self.check_consistency(matrix)
