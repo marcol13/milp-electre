@@ -1,5 +1,6 @@
 from core.credibility import CredibilityMatrix
 from core.relations import *
+from core.score import Score
 import numpy as np
 
 array = np.array([[0.5, 0.5], [0.5, 0.5]])
@@ -14,3 +15,33 @@ relation3 = IncomparableRelation(1, 0)
 print(relation0.compatible(relation1))
 print(relation0.compatible(relation2))
 print(relation0.compatible(relation3))
+
+scoretable = {
+    PositivePreference: {
+        PositivePreference: 0,
+        NegativePreference: 4,
+        Indifference: 2,
+        Incomparible: 3
+    },
+    NegativePreference: {
+        PositivePreference: 0,
+        NegativePreference: 0,
+        Indifference: 2,
+        Incomparible: 3
+    },
+    Indifference: {
+        PositivePreference: 2,
+        NegativePreference: 2,
+        Indifference: 0,
+        Incomparible: 2
+    },
+    Incomparible: {
+        PositivePreference: 3,
+        NegativePreference: 3,
+        Indifference: 2,
+        Incomparible: 0
+    }
+}
+
+score1 = Score(scoretable)
+score1.show()
