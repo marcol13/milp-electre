@@ -1,6 +1,6 @@
 import pandas as pd
 from .relations import *
-from .types import ScoreType
+from .types import ScoreType, RelationType
 from .const import RELATIONS
 
 default_scoretable = {
@@ -40,6 +40,9 @@ class Score:
         df.rename(columns=lambda x: x.name, index=lambda x: x.name, inplace=True)
         print(df)
 
+    def get_distance(self, a:RelationType, b:RelationType):
+        return self.score_matrix[a][b]
+
     def validate(self, score:ScoreType):
         if set(score.keys()) != set(RELATIONS):
             raise ValueError(f"There are incorrect keys. Dictionary should includes: {[rel.name for rel in RELATIONS]}")
@@ -51,3 +54,6 @@ class Score:
             for b in score[a].keys():                
                 if (score[a][b] > 4 or score[a][b] < 0):
                     raise ValueError("Score values should be between 0 and 4 included.")
+                
+    def print_status(self, prob):
+        pass
