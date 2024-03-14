@@ -1,9 +1,10 @@
 from core.credibility import CredibilityMatrix
 from core.relations import *
 from core.score import Score
+from outranking.crisp import CrispOutranking
 import numpy as np
 
-array = np.array([[0.5, 0.5], [0.5, 0.5]])
+array = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
 credibility = CredibilityMatrix(array)
 print(credibility.matrix)
 
@@ -24,7 +25,7 @@ scoretable = {
         Incomparible: 3
     },
     NegativePreference: {
-        PositivePreference: 0,
+        PositivePreference: 4,
         NegativePreference: 0,
         Indifference: 2,
         Incomparible: 3
@@ -45,3 +46,6 @@ scoretable = {
 
 score1 = Score(scoretable)
 score1.show()
+
+crisp = CrispOutranking(credibility, score1)
+crisp.solve_partial()
