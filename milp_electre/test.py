@@ -4,7 +4,7 @@ from core.score import Score
 from outranking.crisp import CrispOutranking
 import numpy as np
 
-array = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+array = np.array([[0, 1, 0], [0, 0, 0], [0, 0, 0]])
 credibility = CredibilityMatrix(array)
 print(credibility.matrix)
 
@@ -48,4 +48,5 @@ score1 = Score(scoretable)
 score1.show()
 
 crisp = CrispOutranking(credibility, score1)
-crisp.solve_partial()
+# crisp.solve_partial()
+crisp.solve_complete()

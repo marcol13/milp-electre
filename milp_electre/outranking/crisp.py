@@ -43,4 +43,23 @@ class CrispOutranking(Outranking):
         self.verbose()
 
     def solve_complete(self):
-        pass
+        self.variables["p"] = self.create_variable_matrix("p")
+        self.variables["z"] = self.create_variable_matrix("z")
+
+        upper_matrix_ids = np.triu_indices(self.size, 1)
+        upper_matrix_ids = np.column_stack(upper_matrix_ids)
+        self.problem += lpSum([self.variables["p"][i][j] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), PositivePreference) + self.variables["p"][j][i] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), NegativePreference) + self.variables["z"][i][j] * (self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), Indifference) - self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), PositivePreference) - self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), NegativePreference)) for [i, j] in upper_matrix_ids])  
+
+        for i in range(self.size):
+            for j in range(self.size):
+                if i != j:
+                    self.problem += self.variables["p"][i][j] + self.variables["p"][j][i] >= 1, f"Weak preference [{i}-{j}]"
+                    self.problem += self.variables["z"][i][j] == self.variables["p"][i][j] + self.variables["p"][j][i] - 1, f"Incomparability [{i}-{j}]"
+
+        unique_permutations = list(permutations(range(self.size), 3))
+        for i, k, p in unique_permutations:
+            self.problem += self.variables["p"][i][k] >= self.variables["p"][i][p] + self.variables["p"][p][k] - 1.5, f"Transition [{i}-{k}-{p}]"
+
+        self.problem.solve()
+
+        self.verbose()
