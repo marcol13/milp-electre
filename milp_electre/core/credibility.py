@@ -1,27 +1,41 @@
 import numpy as np
+from core.const import RELATIONS
+from core.utils import is_array, is_square, is_normalized, check_keys
 
-# Make factory class
+# TODO: Make factory class
 class CredibilityMatrix:
     def __init__(self, matrix: np.ndarray):
         self.check_consistency(matrix)
         self.matrix = matrix
 
-    def __is_array(self, matrix: np.ndarray):
-        if not isinstance(matrix, np.ndarray):
-            raise ValueError("Matrix must be a numpy array")
-        
-    def __is_square(self, matrix: np.ndarray):
-        if matrix.shape[0] != matrix.shape[1]:
-            raise ValueError("Matrix must be square")
-        
-    def __is_normalized(self, matrix: np.ndarray):
-        if not np.all(matrix >= 0) or not np.all(matrix <= 1):
-            raise ValueError("Matrix must have values between 0 and 1")
+    def get_size(self):
+        return self.matrix.shape[0]
 
     def check_consistency(self, matrix):
         try:
-            self.__is_array(matrix)
-            self.__is_square(matrix)
-            self.__is_normalized(matrix)
+            is_array(matrix)
+            is_square(matrix)
+            is_normalized(matrix)
+            # TODO: check if it is integer matrix
         except ValueError:
             raise
+
+
+class StochasticCredibilityMatrix():
+    def __init__(self, matrices: np.ndarray):
+        self.matrix = matrices
+        
+    def check_consistency(self, matrices):
+        try:
+            for matrix in matrices.values():
+                is_array(matrix)
+                is_square(matrix)
+                is_normalized(matrix)
+                # TODO: Check if it is float matrix
+                # TODO: Check if it sum to 1
+            check_keys(matrices, RELATIONS)
+        except ValueError:
+            raise
+
+    def get_size(self):
+        return self.matrix[RELATIONS[0]].shape[0]

@@ -3,14 +3,20 @@ from pulp import LpVariable, LpInteger, LpProblem, LpMinimize, LpStatus
 from core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from core.types import RankingType
 from collections import defaultdict
+from itertools import permutations
 
 class Outranking:
     def __init__(self, credibility, scores):
         self.credibility = credibility.matrix
-        self.size = self.credibility.shape[0]
+        self.size = credibility.get_size()
         self.scores = scores
         self.problem = LpProblem("Maximize_support", LpMinimize)
         self.variables = {}
+
+        self.upper_matrix_ids = np.triu_indices(self.size, 1)
+        self.upper_matrix_ids = np.column_stack(self.upper_matrix_ids)
+
+        self.unique_permutations = list(permutations(range(self.size), 3))
 
     def create_variable_matrix(self, name):
         return np.array([LpVariable(f"{name}_{i}_{k}", 0, 1, LpInteger) if i != k else 0 for i in range(self.size) for k in range(self.size)]).reshape((self.size, self.size))
