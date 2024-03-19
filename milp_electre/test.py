@@ -1,8 +1,9 @@
-from core.credibility import CredibilityMatrix, StochasticCredibilityMatrix
+from core.credibility import CredibilityMatrix, StochasticCredibilityMatrix, ValuedCredibilityMatrix
 from core.relations import *
 from core.score import Score
 from outranking.crisp import CrispOutranking
 from outranking.stochastic import StochasticOutranking
+from outranking.valued import ValuedOutranking
 import numpy as np
 
 array = np.array([[0, 1, 0], [0, 0, 0], [0, 0, 0]])
@@ -16,6 +17,9 @@ arr_r = np.array([[0, 0.1, 0.7], [1, 0, 0.1], [0.7, 0, 0]], dtype=np.float32)
 # stochastic_array = np.array(np.array(arr_pp, arr_pn, arr_i, arr_r))
 
 stochastic_array = StochasticCredibilityMatrix({PositivePreference: arr_pp, NegativePreference: arr_pn, Indifference: arr_i, Incomparible: arr_r})
+
+arr_p = np.array([[0, 1, 0.3], [0, 0, 0.1], [0.7, 0.1, 0]], dtype=np.float32)
+valued_array = ValuedCredibilityMatrix(arr_p)
 
 relation0 = PositivePreference(1, 0)
 relation1 = NegativePreference(0, 1)
@@ -60,6 +64,12 @@ score1.show()
 # crisp.solve_partial()
 # crisp.solve_complete()
 
-stochastic = StochasticOutranking(stochastic_array, score1)
+# stochastic = StochasticOutranking(stochastic_array, score1)
 # stochastic.solve_partial()
-stochastic.solve_complete()
+# stochastic.solve_complete()
+
+valued = ValuedOutranking(valued_array, score1)
+
+# valued.solve_partial()
+valued.solve_complete()
+
