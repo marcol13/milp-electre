@@ -1,24 +1,46 @@
 import numpy as np
 from .node import Node
+from collections import defaultdict
 # from .edge import Edge
 
 class Hasse:
     def __init__(self, matrix: np.ndarray, labels: list[str]):
         self.matrix = matrix
         self.labels = labels
+        self.size = len(matrix)
+        self.__merge_indifference()
+
         self.nodes = self.__create_nodes()
         self.edges = self.__get_edges()
 
-        print(self.edges)
-        print(self.nodes[0].superiors)
-
-
         self.__remove_self_loops()
-        print(self.edges)
-        print(self.nodes[0].superiors)
-
         self.__remove_transitivity()
+
         print(self.edges)
+
+    def __merge_indifference(self):
+        diff = self.matrix - self.matrix.T
+        merged = defaultdict(set)
+        delete_idx = set()
+        for idx, row in enumerate(diff):
+            indices = np.argwhere((row == 0) & (np.arange(len(row)) != idx))
+            if len(indices) > 0:
+                merged[idx].update(*indices)
+        
+        for idx in merged.keys():
+            indices = sorted([idx, *list(merged[idx])])
+            delete_idx.update(indices[1:])
+            new_label = '&'.join([self.labels[i] for i in indices])
+            self.labels[idx] = new_label
+        
+
+        delete_idx = list(delete_idx)
+        if len(delete_idx) > 0:
+            self.matrix = np.delete(self.matrix, delete_idx, 0)
+            self.matrix = np.delete(self.matrix, delete_idx, 1)
+            self.size -= len(delete_idx)
+            for del_idx in delete_idx[::-1]:
+                self.labels.pop(del_idx)
 
     def __create_nodes(self):
         nodes = []
