@@ -9,6 +9,8 @@ class Hasse:
         self.labels = labels
         self.size = len(matrix)
         self.__merge_indifference()
+        self.max_level = np.max(np.sum(self.matrix, axis=1))
+        print("max", self.max_level)
 
         self.nodes = self.__create_nodes()
         self.edges = self.__get_edges()

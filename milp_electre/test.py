@@ -6,6 +6,7 @@ from outranking.stochastic import StochasticOutranking
 from outranking.valued import ValuedOutranking
 import numpy as np
 from core.visualize.hasse import Hasse
+from core.visualize.graph import Graph
 
 array = np.array([[0, 1, 0], [0, 0, 0], [0, 0, 0]])
 credibility = CredibilityMatrix(array)
@@ -88,5 +89,6 @@ bigger_array = np.array([[0,1,1,1], [1,0,1,1], [1,1,0,1], [0,0,0,0]], dtype=np.i
 hasse = Hasse(new_array, ["A", "B", "C"])
 hasse = Hasse(bigger_array, ["A", "B", "C", "D"])
 
+g = Graph(bigger_array, ["A", "B", "C", "D"])
 # l.add_intent('o1', [0,1])
 # l.add_intent('o2', [1,2])
