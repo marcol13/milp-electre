@@ -35,12 +35,12 @@ print(relation0.compatible(relation3))
 scoretable = {
     PositivePreference: {
         PositivePreference: 0,
-        NegativePreference: 4,
+        NegativePreference: 7,
         Indifference: 2,
         Incomparible: 3
     },
     NegativePreference: {
-        PositivePreference: 4,
+        PositivePreference: 7,
         NegativePreference: 0,
         Indifference: 2,
         Incomparible: 3
@@ -70,25 +70,25 @@ score1.show()
 # stochastic.solve_partial()
 # stochastic.solve_complete()
 
-valued = ValuedOutranking(valued_array, score1)
+# valued = ValuedOutranking(valued_array, score1)
 
-# valued.solve_partial()
-valued.solve_complete()
+# # valued.solve_partial()
+# valued.solve_complete()
 
-new_array = np.array([[0,0,1],[0,0,0],[1,0,0]], dtype=np.int32)
-bigger_array = np.array([[0,1,1,1], [1,0,1,1], [1,1,0,1], [0,0,0,0]], dtype=np.int32)
-# cls = MyClass(new_array, ["A", "B", "C"])
-# rel = get_relations(new_array, ["A", "B", "C"])
-# hasse = generate_hasse_diagram(rel)
-# print(rel)
-# print(hasse)
+# new_array = np.array([[0,0,1],[0,0,0],[1,0,0]], dtype=np.int32)
+# bigger_array = np.array([[0,1,1,1], [1,0,1,1], [1,1,0,1], [0,0,0,0]], dtype=np.int32)
+# # cls = MyClass(new_array, ["A", "B", "C"])
+# # rel = get_relations(new_array, ["A", "B", "C"])
+# # hasse = generate_hasse_diagram(rel)
+# # print(rel)
+# # print(hasse)
 
-# cls = MyClass([(1,2),(2,3),(1,3)])
-# cls.draw_diagram()
+# # cls = MyClass([(1,2),(2,3),(1,3)])
+# # cls.draw_diagram()
 
-# hasse = Hasse(new_array, ["A", "B", "C"])
-# hasse = Hasse(bigger_array, ["A", "B", "C", "D"])
+# # hasse = Hasse(new_array, ["A", "B", "C"])
+# # hasse = Hasse(bigger_array, ["A", "B", "C", "D"])
 
-g = Graph(new_array, ["A", "B", "C"])
-# l.add_intent('o1', [0,1])
-# l.add_intent('o2', [1,2])
+# g = Graph(new_array, ["A", "B", "C"])
+# # l.add_intent('o1', [0,1])
+# # l.add_intent('o2', [1,2])
