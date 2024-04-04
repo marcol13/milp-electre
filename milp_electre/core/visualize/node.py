@@ -7,5 +7,8 @@ class Node:
     def add_superior(self, node):
         self.superiors.append(node)
 
+    def __str__(self):
+        return self.name
+
     def __repr__(self):
         return self.name

@@ -1,0 +1,5 @@
+strict digraph {
+	node [shape=box]
+	"A&C"
+	B
+}

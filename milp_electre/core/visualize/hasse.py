@@ -9,6 +9,8 @@ class Hasse:
         self.labels = labels
         self.size = len(matrix)
         self.__merge_indifference()
+        print(self.matrix)
+
 
         self.nodes = self.__create_nodes()
         self.edges = self.__get_edges()
@@ -23,7 +25,7 @@ class Hasse:
         merged = defaultdict(set)
         delete_idx = set()
         for idx, row in enumerate(diff):
-            indices = np.argwhere((row == 0) & (np.arange(len(row)) != idx))
+            indices = np.argwhere((row == 0) & (np.arange(len(row)) != idx) & (self.matrix[idx] == 1))
             if len(indices) > 0:
                 merged[idx].update(*indices)
         
