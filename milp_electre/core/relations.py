@@ -1,5 +1,6 @@
 from mcda.core.relations import Relation, PreferenceRelation, IncomparableRelation, IndifferenceRelation
 
+# TODO: Keep information about relations order
 class PositivePreference(PreferenceRelation):
     short_name = "P+"
     full_name = "Positive Preference"
