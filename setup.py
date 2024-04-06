@@ -14,7 +14,7 @@ classifiers = [
 
 # Setting up
 setup(
-    name="milp_electre",
+    name="pyElectreMILP",
     version=VERSION,
     author="marcol13 (Marcin Krueger)",
     author_email="<marcinkrueger@gmail.com>",

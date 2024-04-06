@@ -2,5 +2,8 @@
 
 lib/
 venv/
+build/
+dist/
+pyElectreMILP.egg-info/
 
 graph.html
