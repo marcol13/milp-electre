@@ -75,6 +75,74 @@ score1.show()
 # # valued.solve_partial()
 # valued.solve_complete()
 
+# arr = np.array([[0,0,0,0,0,0], [1,0,1,1,0,1], [1,0,0,0,0,0],[1,0,1,0,0,1],[1,1,1,1,0,1],[1,0,0,0,0,0]], dtype=np.int32)
+# g = Graph(arr, ["P1", "P2", "P3", "P4", "P5", "P6"])
+
+arr2 = np.array([
+    [1,1,1,0,1,1,1,1,1,1],
+    [0,1,0,0,1,1,1,0,1,1],
+    [0,0,1,0,0,1,0,0,0,0],
+    [0,0,0,1,0,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0],
+    [0,0,0,0,1,1,0,0,0,1],
+    [0,1,1,0,1,1,1,0,0,1],
+    [0,1,0,0,1,1,0,1,1,1],
+    [0,1,0,0,1,0,0,0,1,1],
+    [0,0,0,0,1,0,0,0,0,1]])
+# g1 = Graph(arr2, ["A", "B", "I", "J", "T", "M", "E", "N", "R", "V"])
+cred= CredibilityMatrix(arr2)
+score=Score()
+crisp = CrispOutranking(cred, score)
+crisp.solve_partial()
+# crisp.solve_complete()
+
+result = crisp.get_outranking("outranking")
+
+print(result)
+
+# g1 = Graph(arr2, ["A", "B", "I", "J", "T", "M", "E", "N", "R", "V"])
+
+g = Graph(result, ["A", "B", "I", "J", "T", "M", "E", "N", "R", "V"])
+# print(crisp.get_outranking("outranking"))
+
+medium1 = np.array([[1,0,0,0,0],[1,1,1,0,0],[1,1,1,0,0],[0,0,0,1,1],[0,0,0,0,1]], dtype=np.int32)
+l_medium1 = ["A", "B", "C", "D", "E"]
+c_medium1 = CredibilityMatrix(medium1)
+s_medium1 = Score()
+
+r_medium1 = CrispOutranking(c_medium1, s_medium1)
+r_medium1.solve_partial()
+
+o_medium1 = r_medium1.get_outranking("outranking")
+
+g_medium1 = Graph(o_medium1, l_medium1)
+g_medium1.draw()
+
+# res = np.array([
+# #A
+# [1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
+# #B
+# [0, 1, 0, 0, 1, 1, 0, 0, 0, 1,],
+#  #I
+#  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+#  #J
+#  [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+#  #T
+#  [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+#  #M
+#  [0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+#  #E
+#  [0, 0, 1, 0, 1, 1, 1, 0, 0, 1],
+#  #N
+#  [0, 1, 0, 0, 1, 1, 0, 1, 1, 1],
+#  #R
+#  [0, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+#  #V
+#  [0, 0, 0, 0, 1, 0, 0, 0, 0, 1]])
+
+# g = Graph(res, ["A", "B", "I", "J", "T", "M", "E", "N", "R", "V"])
+# g.draw()
+
 # new_array = np.array([[0,0,1],[0,0,0],[1,0,0]], dtype=np.int32)
 # bigger_array = np.array([[0,1,1,1], [1,0,1,1], [1,1,0,1], [0,0,0,0]], dtype=np.int32)
 # # cls = MyClass(new_array, ["A", "B", "C"])
