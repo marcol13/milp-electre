@@ -1,7 +1,7 @@
 import numpy as np
-from core.const import RELATIONS
-from core.utils import is_array, is_square, is_normalized, check_keys
-from core.relations import PositivePreference, NegativePreference
+from .const import RELATIONS
+from .utils import is_array, is_square, is_normalized, check_keys
+from .relations import PositivePreference, NegativePreference
 
 # TODO: Make factory class
 class CredibilityMatrix:
