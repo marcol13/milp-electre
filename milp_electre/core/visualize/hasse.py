@@ -1,7 +1,7 @@
 import numpy as np
-from .node import Node
+
 from collections import defaultdict
-# from .edge import Edge
+from .node import Node
 
 class Hasse:
     def __init__(self, matrix: np.ndarray, labels: list[str]):
@@ -9,16 +9,12 @@ class Hasse:
         self.labels = labels
         self.size = len(matrix)
         self.__merge_indifference()
-        print(self.matrix)
-
 
         self.nodes = self.__create_nodes()
         self.edges = self.__get_edges()
 
         self.__remove_self_loops()
         self.__remove_transitivity()
-
-        print(self.edges)
 
     def __merge_indifference(self):
         diff = self.matrix - self.matrix.T
@@ -36,7 +32,7 @@ class Hasse:
             self.labels[idx] = new_label
         
 
-        delete_idx = list(delete_idx)
+        delete_idx = sorted(list(delete_idx))
         if len(delete_idx) > 0:
             self.matrix = np.delete(self.matrix, delete_idx, 0)
             self.matrix = np.delete(self.matrix, delete_idx, 1)
@@ -71,10 +67,14 @@ class Hasse:
                 self.__dfs_search(original, superior, visited)
     
     def __remove_self_loops(self):
+        delete_edges = []
         for pair in self.edges:
             if pair[0] == pair[1]:
                 pair[0].superiors.remove(pair[0])
-                self.edges.remove(pair)
+                delete_edges.append(pair)
+
+        for pair in delete_edges:
+            self.edges.remove(pair)
 
     def __remove_transitivity(self):
         for node in self.nodes:
