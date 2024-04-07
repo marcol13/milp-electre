@@ -1,5 +1,23 @@
 strict digraph {
 	node [shape=box]
-	"A&C"
+	A
 	B
+	I
+	J
+	T
+	M
+	E
+	N
+	R
+	V
+	A -> E
+	A -> N
+	B -> M
+	M -> V
+	E -> I
+	E -> M
+	N -> B
+	N -> R
+	R -> V
+	V -> T
 }
