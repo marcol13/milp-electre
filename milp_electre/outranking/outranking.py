@@ -1,7 +1,7 @@
 import numpy as np
 from pulp import LpVariable, LpInteger, LpProblem, LpMinimize, LpStatus
-from core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
-from core.types import RankingType
+from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
+from ..core.types import RankingType
 from collections import defaultdict
 from itertools import permutations
 
@@ -45,6 +45,14 @@ class Outranking:
             print()
 
         print(f"Objective function: {self.problem.objective}")
+
+    def get_outranking(self, relation_array: str):
+        variables = np.array([x.name.split("_") + [x.varValue] for x in self.problem.variables()])
+        variables = variables[variables[:, 0] == relation_array]
+        outranking = np.eye(self.size)
+        for _, i, j, value in variables:
+            outranking[int(i)][int(j)] = value
+        return outranking
 
     @staticmethod
     def get_preference(i: int, j: int):

@@ -1,6 +1,6 @@
 from .outranking import Outranking
-from core.const import RELATIONS
-from core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
+from ..core.const import RELATIONS
+from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from pulp import lpSum
 
 class CrispOutranking(Outranking):
@@ -35,7 +35,7 @@ class CrispOutranking(Outranking):
 
         self.problem.solve()
 
-        self.verbose()
+        # self.verbose()
 
     def solve_complete(self):
         self.variables["p"] = self.create_variable_matrix("p")
@@ -54,4 +54,4 @@ class CrispOutranking(Outranking):
 
         self.problem.solve()
 
-        self.verbose()
+        # self.verbose()

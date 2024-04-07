@@ -1,4 +1,4 @@
-from .outranking import Outranking
+from outranking.outranking import Outranking
 from core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from pulp import lpSum
 
