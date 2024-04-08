@@ -2,9 +2,10 @@ import numpy as np
 
 from collections import defaultdict
 from .node import Node
+from ..types import QuadraticArrayType
 
 class Hasse:
-    def __init__(self, matrix: np.ndarray, labels: list[str]):
+    def __init__(self, matrix: QuadraticArrayType, labels: list[str]):
         self.matrix = matrix
         self.labels = labels
         self.size = len(matrix)
@@ -16,6 +17,7 @@ class Hasse:
         self.__remove_self_loops()
         self.__remove_transitivity()
 
+    #TODO: Make it a return function
     def __merge_indifference(self):
         diff = self.matrix - self.matrix.T
         merged = defaultdict(set)
@@ -40,14 +42,14 @@ class Hasse:
             for del_idx in delete_idx[::-1]:
                 self.labels.pop(del_idx)
 
-    def __create_nodes(self):
+    def __create_nodes(self) -> list[Node]:
         nodes = []
         for idx, label in enumerate(self.labels):
             outranking_level = int(np.sum(self.matrix[idx]))
             nodes.append(Node(label, outranking_level))
         return nodes
 
-    def __get_edges(self):
+    def __get_edges(self) -> list[tuple[Node, Node]]:
         edges = []
         for index in np.argwhere(self.matrix == 1):
             superior = self.nodes[index[0]]

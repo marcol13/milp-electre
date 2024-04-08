@@ -8,9 +8,6 @@ class CrispOutranking(Outranking):
         super().__init__(credibility, scores)
         self.solve()
 
-    def solve(self, mode="complete"):
-        pass
-
     def solve_partial(self):
         self.variables["outranking"] = self.create_variable_matrix("outranking")
         self.variables["pp"] = self.create_variable_matrix("pp")
@@ -35,8 +32,6 @@ class CrispOutranking(Outranking):
 
         self.problem.solve()
 
-        # self.verbose()
-
     def solve_complete(self):
         self.variables["p"] = self.create_variable_matrix("p")
         self.variables["z"] = self.create_variable_matrix("z")
@@ -53,5 +48,4 @@ class CrispOutranking(Outranking):
             self.problem += self.variables["p"][i][k] >= self.variables["p"][i][p] + self.variables["p"][p][k] - 1.5, f"Transition [{i}-{k}-{p}]"
 
         self.problem.solve()
-
-        # self.verbose()
+        

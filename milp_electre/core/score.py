@@ -29,6 +29,3 @@ class Score:
                     raise ValueError("Score values for the same relations are different.")
                 
         check_monotonicity(score, DEFAULT_SCORETABLE)
-                
-    def print_status(self, prob):
-        pass

@@ -1,5 +1,5 @@
 class Node:
-    def __init__(self, name, level=0):
+    def __init__(self, name: str, level: int=0):
         self.name = name
         self.level = level
         self.superiors = []
