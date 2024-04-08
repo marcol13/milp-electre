@@ -1,5 +1,5 @@
-from outranking.outranking import Outranking
-from core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
+from .outranking import Outranking
+from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from pulp import lpSum
 
 class StochasticOutranking(Outranking):
@@ -36,7 +36,7 @@ class StochasticOutranking(Outranking):
 
         self.problem.solve()
 
-        self.verbose()
+        # self.verbose()
 
     def solve_complete(self):
         self.variables["p"] = self.create_variable_matrix("p")
@@ -56,4 +56,4 @@ class StochasticOutranking(Outranking):
 
         self.problem.solve()
 
-        self.verbose()
+        # self.verbose()
