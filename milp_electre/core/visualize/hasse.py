@@ -2,84 +2,92 @@ import numpy as np
 
 from collections import defaultdict
 from .node import Node
+from .edge import Edge
 from ..types import QuadraticArrayType
 
 class Hasse:
     def __init__(self, matrix: QuadraticArrayType, labels: list[str]):
-        self.matrix = matrix
-        self.labels = labels
-        self.size = len(matrix)
-        self.__merge_indifference()
+        self.matrix, self.labels = self.__merge_indifference(matrix, labels)
+        self.size = len(self.matrix)
 
-        self.nodes = self.__create_nodes()
-        self.edges = self.__get_edges()
+        self.nodes = self.__create_nodes(self.matrix, self.labels)
+        self.edges = self.__create_edges(self.matrix, self.nodes)
 
-        self.__remove_self_loops()
-        self.__remove_transitivity()
+        self.edges = self.__hasse_process(self.nodes, self.edges)
 
-    #TODO: Make it a return function
-    def __merge_indifference(self):
-        diff = self.matrix - self.matrix.T
+    def __merge_indifference(self, matrix: QuadraticArrayType, labels: list[str], sep: str="&") -> list[QuadraticArrayType, list[str]]:
+        diff = matrix - matrix.T
         merged = defaultdict(set)
-        delete_idx = set()
+        del_indices = set()
         for idx, row in enumerate(diff):
-            indices = np.argwhere((row == 0) & (np.arange(len(row)) != idx) & (self.matrix[idx] == 1))
+            indices = np.argwhere((row == 0) & (np.arange(len(row)) != idx) & (matrix[idx] == 1))
             if len(indices) > 0:
                 merged[idx].update(*indices)
         
         for idx in merged.keys():
             indices = sorted([idx, *list(merged[idx])])
-            delete_idx.update(indices[1:])
-            new_label = '&'.join([self.labels[i] for i in indices])
-            self.labels[idx] = new_label
+            del_indices.update(indices[1:])
+            new_label = sep.join([labels[i] for i in indices])
+            labels[idx] = new_label
         
 
-        delete_idx = sorted(list(delete_idx))
-        if len(delete_idx) > 0:
-            self.matrix = np.delete(self.matrix, delete_idx, 0)
-            self.matrix = np.delete(self.matrix, delete_idx, 1)
-            self.size -= len(delete_idx)
-            for del_idx in delete_idx[::-1]:
-                self.labels.pop(del_idx)
+        del_indices = sorted(list(del_indices))
+        if len(del_indices) > 0:
+            matrix = np.delete(matrix, del_indices, 0)
+            matrix = np.delete(matrix, del_indices, 1)
+            for del_idx in del_indices[::-1]:
+                labels.pop(del_idx)
 
-    def __create_nodes(self) -> list[Node]:
+        return matrix, labels
+
+    def __create_nodes(self, matrix: QuadraticArrayType, labels: list[str]) -> list[Node]:
         nodes = []
-        for idx, label in enumerate(self.labels):
-            outranking_level = int(np.sum(self.matrix[idx]))
+        for idx, label in enumerate(labels):
+            outranking_level = int(np.sum(matrix[idx]))
             nodes.append(Node(label, outranking_level))
         return nodes
 
-    def __get_edges(self) -> list[tuple[Node, Node]]:
+    def __create_edges(self, matrix:QuadraticArrayType, nodes: list[Node]) -> list[Edge]:
         edges = []
-        for index in np.argwhere(self.matrix == 1):
-            superior = self.nodes[index[0]]
-            collateral = self.nodes[index[1]]
+        for index in np.argwhere(matrix == 1):
+            superior = nodes[index[0]]
+            collateral = nodes[index[1]]
 
             collateral.add_superior(superior)
-            edges.append((collateral, superior))
+            edges.append(Edge(collateral, superior))
         return edges
     
-    def __dfs_search(self, original, node, visited):
+    def __dfs_search(self, original: Node, node: Node, edges: list[tuple[Node, Node]], visited: list[Node]) -> list[tuple[Node, Node]]:
         visited.append(node)
         
         for superior in node.superiors:
-            if (original, superior) in self.edges:
-                self.edges.remove((original, superior))
+            if Edge(original, superior) in edges:
+                edges.remove(Edge(original, superior))
             if superior not in visited:
-                self.__dfs_search(original, superior, visited)
+                self.__dfs_search(original, superior, edges, visited)
+        return edges
     
-    def __remove_self_loops(self):
-        delete_edges = []
-        for pair in self.edges:
-            if pair[0] == pair[1]:
-                pair[0].superiors.remove(pair[0])
-                delete_edges.append(pair)
+    def __remove_self_loops(self, edges: list[Edge]) -> list[Edge]:
+        del_edges = []
+        for edge in edges:
+            if edge.is_self_loop():
+                edge.a.superiors.remove(edge.b)
+                del_edges.append(edge)
 
-        for pair in delete_edges:
-            self.edges.remove(pair)
+        for del_edge in del_edges:
+            edges.remove(del_edge)
 
-    def __remove_transitivity(self):
-        for node in self.nodes:
+        return edges
+
+    def __remove_transitivity(self, nodes: list[Node], edges: list[Edge]) -> list[Edge]:
+        for node in nodes:
             for superior in node.superiors:
-                self.__dfs_search(node, superior, [])
+                edges = self.__dfs_search(node, superior, edges, [])
 
+        return edges
+
+    def __hasse_process(self, nodes: list[Node], edges: list[Edge]) -> list[Edge]:
+        edges = self.__remove_self_loops(edges)
+        edges = self.__remove_transitivity(nodes, edges)
+
+        return edges

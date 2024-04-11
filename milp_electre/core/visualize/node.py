@@ -4,11 +4,11 @@ class Node:
         self.level = level
         self.superiors = []
 
-    def add_superior(self, node):
+    def add_superior(self, node: 'Node'):
         self.superiors.append(node)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name

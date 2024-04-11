@@ -3,18 +3,23 @@ from .hasse import Hasse
 from ..types import QuadraticArrayType
 
 class Graph(Hasse):
-    #TODO: Add possibility to pass options data for graphviz rendering
-    def __init__(self, matrix: QuadraticArrayType, labels: list[str]):
+    def __init__(self, matrix: QuadraticArrayType, labels: list[str], *options: dict):
         super().__init__(matrix, labels)
-        self.G = Digraph(format='png', strict=True)
 
+        try:
+            self.G = Digraph(format='png', strict=True, *options)
+        except Exception as e:
+            raise e
+
+        self.__initialize_structure()
+        self.G.attr("node", shape="box")
+
+    def __initialize_structure(self):
         for node in self.nodes:
             self.G.node(str(node))
 
         for edge in self.edges:
-            self.G.edge(str(edge[1]), str(edge[0]))
-
-        self.G.attr("node", shape="box")
+            self.G.edge(str(edge.b), str(edge.a))
 
     def save(self, filename: str, view: bool=False):
         self.G.render(filename, view=view)
