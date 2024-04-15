@@ -1,8 +1,0 @@
-strict digraph {
-	node [shape=box]
-	A
-	B
-	C
-	A -> B
-	B -> C
-}

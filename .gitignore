@@ -5,5 +5,6 @@ venv/
 build/
 dist/
 pyElectreMILP.egg-info/
+.pytest_cache/
 
 graph.html
