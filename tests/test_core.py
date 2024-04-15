@@ -1,6 +1,6 @@
 import pytest
 
-from milp_electre.core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
+from mcdalp.core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 
 class TestRelations:
     def test_positivePreference(self):
@@ -71,7 +71,7 @@ class TestRelations:
         assert relation.compatible(Indifference(1, 2)) == True
         assert relation.compatible(Incomparible(1, 2)) == True
 
-from milp_electre.core.score import Score
+from mcdalp.core.score import Score
 from .helpers import Dummy
 
 class TestDistanceMatrix():

@@ -160,3 +160,9 @@ g_medium1.draw()
 # g = Graph(new_array, ["A", "B", "C"])
 # # l.add_intent('o1', [0,1])
 # # l.add_intent('o2', [1,2])
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()
