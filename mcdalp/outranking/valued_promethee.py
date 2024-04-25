@@ -3,7 +3,7 @@ from ..core.relations import PositivePreference, NegativePreference, Indifferenc
 from ..core.const import RankingMode
 from pulp import lpSum
 
-class ValuedOutranking(Outranking):
+class ValuedPrometheeOutranking(Outranking):
     def __init__(self, credibility, scores):
         super().__init__(credibility, scores)
         self.valued_credibility = self.credibility
