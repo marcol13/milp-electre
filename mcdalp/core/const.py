@@ -1,6 +1,11 @@
 from .relations import PositivePreference, NegativePreference, Incomparible, Indifference
+from enum import Enum
 
 RELATIONS = [PositivePreference, NegativePreference, Incomparible, Indifference]
+
+class RankingMode(Enum):
+    PARTIAL = "partial"
+    COMPLETE = "complete"
 
 DEFAULT_SCORETABLE = {
     PositivePreference: {
