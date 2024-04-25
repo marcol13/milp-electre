@@ -3,7 +3,7 @@ from core.relations import *
 from core.score import Score
 from outranking.crisp import CrispOutranking
 from outranking.stochastic import StochasticOutranking
-from outranking.valued import ValuedOutranking
+from mcdalp.outranking.valued_promethee import ValuedPrometheeOutranking
 import numpy as np
 from core.visualize.hasse import Hasse
 from core.visualize.graph import Graph
@@ -70,7 +70,7 @@ score1.show()
 # stochastic.solve_partial()
 # stochastic.solve_complete()
 
-# valued = ValuedOutranking(valued_array, score1)
+# valued = ValuedPrometheeOutranking(valued_array, score1)
 
 # # valued.solve_partial()
 # valued.solve_complete()
