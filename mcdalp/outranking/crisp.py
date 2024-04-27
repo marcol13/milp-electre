@@ -8,20 +8,20 @@ class CrispOutranking(Outranking):
     def __init__(self, credibility, scores):
         super().__init__(credibility, scores)
 
-    def solve_partial(self):
-        self.variables = self.create_variables(["outranking", "pp", "pn", "i", "r"])
-        problem_relations = [{"var": self.variables["pp"], "rel": PositivePreference}, {"var": self.variables["pn"], "rel": NegativePreference}, {"var": self.variables["i"], "rel": Indifference}, {"var": self.variables["r"], "rel": Incomparible}]
+    def init_partial(self, problem):
+        variables = self.create_variables(["outranking", "pp", "pn", "i", "r"])
+        problem_relations = [{"var": variables["pp"], "rel": PositivePreference}, {"var": variables["pn"], "rel": NegativePreference}, {"var": variables["i"], "rel": Indifference}, {"var": variables["r"], "rel": Incomparible}]
 
-        self.problem += lpSum([relation["var"][i][j] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), relation["rel"]) for [i, j] in self.upper_matrix_ids for relation in problem_relations])
-        self.problem = self.add_contraints(RankingMode.PARTIAL, self.problem, self.variables, self.size, self.unique_permutations)
+        problem += lpSum([relation["var"][i][j] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), relation["rel"]) for [i, j] in self.upper_matrix_ids for relation in problem_relations])
+        problem = self.add_contraints(RankingMode.PARTIAL, problem, variables, self.size, self.unique_permutations)
 
-        self.problem.solve()
+        return problem
 
-    def solve_complete(self):
-        self.variables = self.create_variables(["p", "z"])
+    def init_complete(self, problem):
+        variables = self.create_variables(["p", "z"])
 
-        self.problem += lpSum([self.variables["p"][i][j] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), PositivePreference) + self.variables["p"][j][i] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), NegativePreference) + self.variables["z"][i][j] * (self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), Indifference) - self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), PositivePreference) - self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), NegativePreference)) for [i, j] in self.upper_matrix_ids])  
-        self.problem = self.add_contraints(RankingMode.COMPLETE, self.problem, self.variables, self.size, self.unique_permutations)
+        problem += lpSum([variables["p"][i][j] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), PositivePreference) + variables["p"][j][i] * self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), NegativePreference) + variables["z"][i][j] * (self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), Indifference) - self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), PositivePreference) - self.scores.get_distance(self.get_preference(self.credibility[i][j], self.credibility[j][i]), NegativePreference)) for [i, j] in self.upper_matrix_ids])  
+        problem = self.add_contraints(RankingMode.COMPLETE, problem, variables, self.size, self.unique_permutations)
 
-        self.problem.solve()
+        return problem
         

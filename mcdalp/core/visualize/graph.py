@@ -24,8 +24,8 @@ class Graph(Hasse):
     def save(self, filename: str, view: bool=False):
         self.G.render(filename, view=view)
 
-    def show(self):
-        self.G.view()
+    def show(self, filename: str = "digraph", directory: str = "./graphs/"):
+        self.G.view(filename=filename, directory=directory)
     
     def get_graph(self) -> Digraph:
         return self.G

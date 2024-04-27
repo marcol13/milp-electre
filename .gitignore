@@ -1,10 +1,17 @@
+# Cache
 **/*/__pycache__
 
+# Directories
 lib/
 venv/
 build/
 dist/
 pyElectreMILP.egg-info/
 .pytest_cache/
+examples/graphs/*
 
+# Files
 graph.html
+
+# Exemptions
+!examples/graphs/.gitkeep
