@@ -10,8 +10,8 @@ class ValuedElectreOutranking(Outranking):
         super().__init__(credibility, scores)
         self.valued_credibility = self.credibility
 
-    def solve_partial(self):
-        self.variables = self.create_variables(["outranking", "pp", "pn", "i", "r"])
+    def init_partial(self, problem):
+        variables = self.create_variables(["outranking", "pp", "pn", "i", "r"])
 
         reversed_matrix = self.valued_credibility.T
 
@@ -20,25 +20,16 @@ class ValuedElectreOutranking(Outranking):
         indifference_matrix = np.minimum(self.valued_credibility, reversed_matrix)
         incomparible_matrix = np.minimum(1 - self.valued_credibility, 1 - reversed_matrix)
 
-        # print("POSITIVE PREFERENCE MATRIX")
-        # print(positive_preference_matrix)
-        # print("NEGATIVE PREFERENCE MATRIX")
-        # print(negative_preference_matrix)
-        # print("INDIFFERENCE MATRIX")
-        # print(indifference_matrix)
-        # print("INCOMPARIBLE MATRIX")
-        # print(incomparible_matrix)
-
-        problem_relations = [{"var": self.variables["pp"], "rel": PositivePreference}, {"var": self.variables["pn"], "rel": NegativePreference}, {"var": self.variables["i"], "rel": Indifference}, {"var": self.variables["r"], "rel": Incomparible}]
+        problem_relations = [{"var": variables["pp"], "rel": PositivePreference}, {"var": variables["pn"], "rel": NegativePreference}, {"var": variables["i"], "rel": Indifference}, {"var": variables["r"], "rel": Incomparible}]
         valued_relations = [{"var": positive_preference_matrix, "rel": PositivePreference}, {"var": negative_preference_matrix, "rel": NegativePreference}, {"var": indifference_matrix, "rel": Indifference}, {"var": incomparible_matrix, "rel": Incomparible}]
 
-        self.problem += lpSum([s_relation["var"][i][j] * p_relation["var"][i][j] * self.scores.get_distance(s_relation["rel"], p_relation["rel"]) for s_relation in valued_relations for p_relation in problem_relations for [i, j] in self.upper_matrix_ids])
-        self.problem = self.add_contraints(RankingMode.PARTIAL, self.problem, self.variables, self.size, self.unique_permutations)
+        problem += lpSum([s_relation["var"][i][j] * p_relation["var"][i][j] * self.scores.get_distance(s_relation["rel"], p_relation["rel"]) for s_relation in valued_relations for p_relation in problem_relations for [i, j] in self.upper_matrix_ids])
+        problem = self.add_contraints(RankingMode.PARTIAL, problem, variables, self.size, self.unique_permutations)
 
-        self.problem.solve()
+        return problem
 
     def solve_complete(self):
-        self.variables = self.create_variables(["p", "z"])
+        variables = self.create_variables(["p", "z"])
         reversed_matrix = self.valued_credibility.T
 
         positive_preference_matrix = np.minimum(self.valued_credibility, 1 - reversed_matrix)
@@ -47,7 +38,7 @@ class ValuedElectreOutranking(Outranking):
 
         valued_relations = [{"var": positive_preference_matrix, "rel": PositivePreference}, {"var": negative_preference_matrix, "rel": NegativePreference}, {"var": indifference_matrix, "rel": Indifference}]
 
-        self.problem += lpSum([s_relation["var"][i][j] * (self.variables["p"][i][j] - self.variables["z"][i][j]) * self.scores.get_distance(s_relation["rel"], PositivePreference) + (self.variables["p"][j][i] - self.variables["z"][i][j]) * s_relation["var"][i][j] * self.scores.get_distance(s_relation["rel"], NegativePreference) + self.variables["z"][i][j] * s_relation["var"][i][j] * self.scores.get_distance(s_relation["rel"], Indifference) for [i, j] in self.upper_matrix_ids for s_relation in valued_relations])
-        self.problem = self.add_contraints(RankingMode.COMPLETE, self.problem, self.variables, self.size, self.unique_permutations)
+        problem += lpSum([s_relation["var"][i][j] * (variables["p"][i][j] - variables["z"][i][j]) * self.scores.get_distance(s_relation["rel"], PositivePreference) + (variables["p"][j][i] - variables["z"][i][j]) * s_relation["var"][i][j] * self.scores.get_distance(s_relation["rel"], NegativePreference) + variables["z"][i][j] * s_relation["var"][i][j] * self.scores.get_distance(s_relation["rel"], Indifference) for [i, j] in self.upper_matrix_ids for s_relation in valued_relations])
+        problem = self.add_contraints(RankingMode.COMPLETE, problem, variables, self.size, self.unique_permutations)
 
-        self.problem.solve()
+        return problem
