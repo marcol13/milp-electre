@@ -17,6 +17,7 @@ class Outranking(ABC):
         self.labels = labels
         self.problem = LpProblem("Maximize_support", LpMinimize)
         self.results = []
+        self.mode = None
 
         self.upper_matrix_ids = np.triu_indices(self.size, 1)
         self.upper_matrix_ids = np.column_stack(self.upper_matrix_ids)
@@ -28,8 +29,10 @@ class Outranking(ABC):
 
     def solve(self, mode: RankingModeType, all_results: bool = False):
         if mode == "partial":
+            self.mode = RankingMode.PARTIAL
             self.problem = self.init_partial(self.problem)
         elif mode == "complete":
+            self.mode = RankingMode.COMPLETE
             self.problem = self.init_complete(self.problem)
         else:
             self.results = None
@@ -43,7 +46,6 @@ class Outranking(ABC):
         if all_results:
             prev_objective_value = None
             while True:
-                print(problem.constraints)
                 problem.solve()
                 if problem.status == LpStatusOptimal and (prev_objective_value is None or problem.objective.value() <= prev_objective_value):
                     prev_objective_value = problem.objective.value()
@@ -64,6 +66,10 @@ class Outranking(ABC):
 
     @abstractmethod
     def init_complete(self, all_results: bool = False):
+        pass
+
+    @abstractmethod
+    def create_table(self, all_results: bool = False):
         pass
 
     def create_variables(self, relations: list[str]) -> dict:
@@ -167,3 +173,13 @@ class Outranking(ABC):
         else:
             graph = Graph(self.results[0], self.labels)
             graph.save(path)
+
+    def show_table(self, all_results: bool = False):
+        plots = self.create_table(all_results)
+        for plot in plots:
+            plot.show()
+
+    def save_table(self, all_results: bool = False, path: str = "table"):
+        plots = self.create_table(all_results)
+        for idx, plot in enumerate(plots):
+            plot.save(f"{path}_{idx}")
