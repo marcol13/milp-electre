@@ -4,15 +4,17 @@ from pulp.constants import LpStatusOptimal, LpStatusNotSolved
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.types import RankingModeType
 from ..core.const import RankingMode
+from ..core.visualize.graph import Graph
 from collections import defaultdict
 from itertools import permutations
 from abc import ABC, abstractmethod
 
 class Outranking(ABC):
-    def __init__(self, credibility, scores):
+    def __init__(self, credibility, scores, labels: list[str]):
         self.credibility = credibility.matrix
         self.size = credibility.get_size()
         self.scores = scores
+        self.labels = labels
         self.problem = LpProblem("Maximize_support", LpMinimize)
         self.results = []
 
@@ -47,9 +49,7 @@ class Outranking(ABC):
                     prev_objective_value = problem.objective.value()
                     result_matrix = self.get_outranking(problem, "p")
                     results.append(result_matrix)
-                    # print(problem.constraints)
                     problem = self.get_new_constraints(problem)
-                    # print(problem.constraints)
                 else:
                     break
         else:
@@ -136,10 +136,7 @@ class Outranking(ABC):
         for var in problem.variables():
             if var.varValue == 1:
                 final_values.append(var)
-        # print(final_values)
-        # print(problem.constraints)
         problem += lpSum([var for var in final_values]) <= len(final_values) - 1
-        # print(problem.constraints)
         return problem
 
     @staticmethod
@@ -152,3 +149,21 @@ class Outranking(ABC):
             return Indifference
         else:
             return Incomparible
+        
+    def show_graph(self, all_results: bool = False):
+        if all_results:
+            for idx, result in enumerate(self.results):
+                graph = Graph(result, self.labels)
+                graph.show(f"temp_{idx}")
+        else:
+            graph = Graph(self.results[0], self.labels)
+            graph.show("temp")
+
+    def save_graph(self, all_results: bool = False, path: str = "temp"):
+        if all_results:
+            for idx, result in enumerate(self.results):
+                graph = Graph(result, self.labels)
+                graph.save(f"{path}_{idx}")
+        else:
+            graph = Graph(self.results[0], self.labels)
+            graph.save(path)

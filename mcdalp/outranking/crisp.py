@@ -5,8 +5,8 @@ from ..core.const import RankingMode
 from pulp import lpSum
 
 class CrispOutranking(Outranking):
-    def __init__(self, credibility, scores):
-        super().__init__(credibility, scores)
+    def __init__(self, credibility, scores, labels):
+        super().__init__(credibility, scores, labels)
 
     def init_partial(self, problem):
         variables = self.create_variables(["outranking", "pp", "pn", "i", "r"])

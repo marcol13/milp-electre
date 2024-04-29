@@ -6,8 +6,8 @@ from ..core.const import RankingMode
 from pulp import lpSum
 
 class ValuedElectreOutranking(Outranking):
-    def __init__(self, credibility, scores):
-        super().__init__(credibility, scores)
+    def __init__(self, credibility, scores, labels):
+        super().__init__(credibility, scores, labels)
         self.valued_credibility = self.credibility
 
     def init_partial(self, problem):
