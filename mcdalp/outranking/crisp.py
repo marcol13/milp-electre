@@ -2,6 +2,7 @@ from .outranking import Outranking
 from ..core.const import RELATIONS
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.const import RankingMode
+from ..core.visualize.table import CrispTable
 from pulp import lpSum
 
 class CrispOutranking(Outranking):
@@ -25,3 +26,11 @@ class CrispOutranking(Outranking):
 
         return problem
         
+    def create_table(self, all_results: bool = False):
+        if all_results:
+            for result in self.results:
+                table = CrispTable(self.credibility, result, self.labels)
+                table.draw()
+        else:
+            table = CrispTable(self.credibility, self.results[0], self.labels)
+            table.draw()

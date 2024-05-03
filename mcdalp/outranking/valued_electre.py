@@ -3,6 +3,7 @@ import numpy as np
 from .outranking import Outranking
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.const import RankingMode
+from ..core.visualize.table import ValuedTable
 from pulp import lpSum
 
 class ValuedElectreOutranking(Outranking):
@@ -28,7 +29,7 @@ class ValuedElectreOutranking(Outranking):
 
         return problem
 
-    def solve_complete(self):
+    def init_complete(self, problem):
         variables = self.create_variables(["p", "z"])
         reversed_matrix = self.valued_credibility.T
 
@@ -42,3 +43,12 @@ class ValuedElectreOutranking(Outranking):
         problem = self.add_contraints(RankingMode.COMPLETE, problem, variables, self.size, self.unique_permutations)
 
         return problem
+    
+    def create_table(self, all_results: bool = False):
+        if all_results:
+            for result in self.results:
+                table = ValuedTable(self.credibility, result, self.labels)
+                table.draw()
+        else:
+            table = ValuedTable(self.credibility, self.results[0], self.labels)
+            table.draw()
