@@ -3,7 +3,7 @@ import numpy as np
 from collections import defaultdict
 from .node import Node
 from .edge import Edge
-from ..types import QuadraticArrayType
+from ...types import QuadraticArrayType
 
 class Hasse:
     def __init__(self, matrix: QuadraticArrayType, labels: list[str]):

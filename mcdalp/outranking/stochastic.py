@@ -1,7 +1,7 @@
 from .outranking import Outranking
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.const import RankingMode
-from ..core.visualize.table import StochasticTable
+from ..core.visualize.table.stochastic_table import StochasticTable
 from pulp import lpSum
 
 class StochasticOutranking(Outranking):

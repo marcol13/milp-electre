@@ -1,7 +1,7 @@
 from .outranking import Outranking
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.const import RankingMode
-from ..core.visualize.table import ValuedTable
+from ..core.visualize.table.valued_table import ValuedTable
 from pulp import lpSum
 
 class ValuedPrometheeOutranking(Outranking):

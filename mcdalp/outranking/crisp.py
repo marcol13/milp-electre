@@ -2,7 +2,7 @@ from .outranking import Outranking
 from ..core.const import RELATIONS
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.const import RankingMode
-from ..core.visualize.table import CrispTable
+from ..core.visualize.table.crisp_table import CrispTable
 from pulp import lpSum
 
 class CrispOutranking(Outranking):
