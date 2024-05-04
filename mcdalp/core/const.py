@@ -2,6 +2,8 @@ from .relations import PositivePreference, NegativePreference, Incomparible, Ind
 from enum import Enum
 
 RELATIONS = [PositivePreference, NegativePreference, Incomparible, Indifference]
+PARTIAL_OUTPUT = "outranking"
+COMPLETE_OUTPUT = "p"
 
 class RankingMode(Enum):
     PARTIAL = "partial"

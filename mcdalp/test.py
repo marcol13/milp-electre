@@ -5,8 +5,8 @@ from outranking.crisp import CrispOutranking
 from outranking.stochastic import StochasticOutranking
 from mcdalp.outranking.valued_promethee import ValuedPrometheeOutranking
 import numpy as np
-from core.visualize.hasse import Hasse
-from core.visualize.graph import Graph
+from mcdalp.core.visualize.graph.hasse import Hasse
+from core.visualize.graph.graph import Graph
 
 array = np.array([[0, 1, 0], [0, 0, 0], [0, 0, 0]])
 credibility = CredibilityMatrix(array)

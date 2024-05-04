@@ -1,6 +1,6 @@
 from graphviz import Digraph
 from .hasse import Hasse
-from ..types import QuadraticArrayType
+from ...types import QuadraticArrayType
 
 class Graph(Hasse):
     def __init__(self, matrix: QuadraticArrayType, labels: list[str], *options: dict):

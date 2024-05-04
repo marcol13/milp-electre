@@ -56,7 +56,9 @@ class Outranking(ABC):
                     break
         else:
             problem.solve()
-            results.append(problem)
+            result_matrix = self.get_outranking(problem, "p")
+            results.append(result_matrix)
+            # results.append(problem)
 
         return results
 
