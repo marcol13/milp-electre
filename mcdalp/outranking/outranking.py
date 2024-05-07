@@ -1,10 +1,10 @@
 import numpy as np
 from pulp import LpVariable, LpInteger, LpProblem, LpMinimize, LpStatus, lpSum
-from pulp.constants import LpStatusOptimal, LpStatusNotSolved
+from pulp.constants import LpStatusOptimal
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.types import RankingModeType
-from ..core.const import RankingMode
-from ..core.visualize.graph import Graph
+from ..core.const import RankingMode, PARTIAL_OUTPUT, COMPLETE_OUTPUT
+from ..core.visualize.graph.graph import Graph
 from collections import defaultdict
 from itertools import permutations
 from abc import ABC, abstractmethod
@@ -18,6 +18,7 @@ class Outranking(ABC):
         self.problem = LpProblem("Maximize_support", LpMinimize)
         self.results = []
         self.mode = None
+        self.outranking_matrix = None
 
         self.upper_matrix_ids = np.triu_indices(self.size, 1)
         self.upper_matrix_ids = np.column_stack(self.upper_matrix_ids)
@@ -30,9 +31,11 @@ class Outranking(ABC):
     def solve(self, mode: RankingModeType, all_results: bool = False):
         if mode == "partial":
             self.mode = RankingMode.PARTIAL
+            self.outranking_matrix = PARTIAL_OUTPUT
             self.problem = self.init_partial(self.problem)
         elif mode == "complete":
             self.mode = RankingMode.COMPLETE
+            self.outranking_matrix = COMPLETE_OUTPUT
             self.problem = self.init_complete(self.problem)
         else:
             self.results = None
@@ -49,16 +52,15 @@ class Outranking(ABC):
                 problem.solve()
                 if problem.status == LpStatusOptimal and (prev_objective_value is None or problem.objective.value() <= prev_objective_value):
                     prev_objective_value = problem.objective.value()
-                    result_matrix = self.get_outranking(problem, "p")
+                    result_matrix = self.get_outranking(problem, self.outranking_matrix)
                     results.append(result_matrix)
                     problem = self.get_new_constraints(problem)
                 else:
                     break
         else:
             problem.solve()
-            result_matrix = self.get_outranking(problem, "p")
+            result_matrix = self.get_outranking(problem, self.outranking_matrix)
             results.append(result_matrix)
-            # results.append(problem)
 
         return results
 

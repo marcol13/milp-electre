@@ -16,7 +16,7 @@ class Graph(Hasse):
 
     def __initialize_structure(self):
         for node in self.nodes:
-            self.G.node(str(node))
+            self.G.node(str(node), pos=f",{node.level}!")
 
         for edge in self.edges:
             self.G.edge(str(edge.b), str(edge.a))
