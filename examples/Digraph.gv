@@ -1,0 +1,14 @@
+strict digraph {
+	A [pos="6,0!"]
+	B [pos="4,0!"]
+	C [pos="1,0!"]
+	D [pos="3,0!"]
+	E [pos="2,0!"]
+	F [pos="1,0!"]
+	A -> B
+	A -> C
+	B -> D
+	D -> E
+	E -> F
+	node [shape=box]
+}
