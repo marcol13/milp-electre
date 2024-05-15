@@ -13,34 +13,40 @@ class TestCredibilityMatrix:
             _ = CredibilityMatrix(matrix)
 
     def test_isSquare(self):
-        matrix = [[0, 1], [1, 1], [1, 0]]
+        matrix = np.array([[0, 1], [1, 1], [1, 0]])
 
         with pytest.raises(ValueError):
             _ = CredibilityMatrix(matrix)
 
     def test_isNormalized(self):
-        matrix = [[0, 2], [1, 1]]
+        matrix = np.array([[0, 2], [1, 1]])
 
         with pytest.raises(ValueError):
             _ = CredibilityMatrix(matrix)
 
     def test_isTheSameArray(self):
-        matrix = [[0.5, 0.7], [0.3, 0]]
+        matrix = np.array([[0.5, 0.7], [0.3, 0]])
 
         with pytest.raises(ValueError):
             _ = CredibilityMatrix(matrix)
 
     def test_createCredibilityMatrix(self):
-        matrix = [[0, 1, 0], [1, 0, 1], [1, 0, 0]]
+        matrix = np.array([[0, 1, 0], [1, 0, 1], [1, 0, 0]])
         credibility_matrix = CredibilityMatrix(matrix)
         
         assert isinstance(credibility_matrix, CredibilityMatrix)
 
     def test_lenCredibilityMatrix(self):
-        matrix = [[0, 1, 0], [1, 0, 1], [1, 0, 0]]
+        matrix = np.array([[0, 1, 0], [1, 0, 1], [1, 0, 0]])
         credibility_matrix = CredibilityMatrix(matrix)
 
         assert len(credibility_matrix) == 3
+
+    def test_allowLists(self):
+        matrix = [[0, 1, 0], [1, 0, 1], [1, 0, 0]]
+        credibility_matrix = CredibilityMatrix(matrix)
+
+        assert isinstance(credibility_matrix, CredibilityMatrix)
 
 class TestStochasticCredibilityMatrix:
     def test_isMatrix(self):
@@ -126,6 +132,17 @@ class TestStochasticCredibilityMatrix:
 
         assert len(stochastic_credibility_matrix) == 3
 
+    def test_allowLists(self):
+        matrices = {
+            PositivePreference: [[0.1, 0.2, 1], [0.1, 0.2, 1], [0.1, 0.2, 1]],
+            NegativePreference: [[0.1, 0.2, 0], [0.1, 0.2, 0], [0.1, 0.2, 0]],
+            Indifference: [[0.2, 0.1, 0], [0.2, 0.1, 0], [0.2, 0.1, 0]],
+            Incomparible: [[0.6, 0.5, 0], [0.6, 0.5, 0], [0.6, 0.5, 0]]
+        }
+        stochastic_credibility_matrix = StochasticCredibilityMatrix(matrices)
+
+        assert isinstance(stochastic_credibility_matrix, StochasticCredibilityMatrix)
+
 class TestValuedCredibilityMatrix:
     def test_isMatrix(self):
         matrices = "test"
@@ -164,4 +181,9 @@ class TestValuedCredibilityMatrix:
 
         assert len(valued_credibility_matrix) == 3
 
-# TODO: Test if it is possible to provide list instead of numpy array
+    def test_allowLists(self):
+        matrices = [[0, 0.6, 0.8], [0.2, 0, 0.2], [0.8, 0.4, 0]]
+        valued_credibility_matrix = ValuedCredibilityMatrix(matrices)
+
+        assert isinstance(valued_credibility_matrix, ValuedCredibilityMatrix)
+        
