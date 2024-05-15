@@ -57,10 +57,10 @@ class ValuedCredibilityMatrix():
     def __init__(self, matrices: np.ndarray):
         self.matrix = np.asarray(matrices, dtype=float)
         self.matrix = zero_diagonal(self.matrix)
-        self.check_consisntency(self.matrix, matrices)
+        self.check_consistency(self.matrix, matrices)
         
     def __len__(self):
-        self.matrix.shape[0]
+        return self.matrix.shape[0]
 
     def __repr__(self) -> str:
         return f"{self.matrix}"
