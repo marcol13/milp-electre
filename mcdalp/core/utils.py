@@ -16,14 +16,18 @@ def check_keys(dictionary, relations):
     if set(dictionary.keys()) != set(relations):
         raise ValueError(f"There are incorrect keys. Dictionary should includes: {[str(rel) for rel in relations]}")
 
-def is_sum_one(matrices: np.ndarray):
-    sum_matrix = np.sum(matrices, axis=1) + np.ones(len(matrices))
+def is_sum_one(matrices: np.ndarray, shape: int):
+    sum_matrix = np.sum(matrices, axis=0) + np.eye(shape)
     if not np.all(sum_matrix == 1):
         raise ValueError("Sum of all relations must be equal to 1")
 
 def is_the_same_array(matrix: np.ndarray, matrix2: np.ndarray):
     if not np.array_equal(matrix, matrix2):
         raise ValueError("Wrong dtype of matrix")
+    
+def zero_diagonal(matrix: np.ndarray):
+    np.fill_diagonal(matrix, 0)
+    return matrix
 
 def get_numbers_relation(a: int, b: int):
     if a > b:

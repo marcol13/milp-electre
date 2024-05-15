@@ -1,11 +1,12 @@
 import numpy as np
 from .const import RELATIONS
-from .utils import is_array, is_square, is_normalized, check_keys, is_sum_one, is_the_same_array
+from .utils import is_array, is_square, is_normalized, check_keys, is_sum_one, is_the_same_array, zero_diagonal
 
 
 class CredibilityMatrix:
     def __init__(self, matrix: np.ndarray):
         self.matrix = np.asarray(matrix, dtype=int)
+        self.matrix = zero_diagonal(self.matrix)
         self.check_consistency(self.matrix, matrix)
     
     def __len__(self):
@@ -29,6 +30,7 @@ class StochasticCredibilityMatrix():
         self.matrix = matrices
         for key in matrices:
             self.matrix[key] = np.asarray(matrices[key], dtype=float)
+            self.matrix[key] = zero_diagonal(self.matrix[key])
         self.check_consistency(self.matrix, matrices)
 
     def __len__(self):
@@ -45,7 +47,8 @@ class StochasticCredibilityMatrix():
                 is_normalized(matrix)
                 is_the_same_array(matrix, org_matrix)
             check_keys(matrices, RELATIONS)
-            is_sum_one(matrices)
+            values = np.array([matrix for matrix in matrices.values()])
+            is_sum_one(values, len(self))
         except ValueError:
             raise
     
@@ -53,6 +56,7 @@ class StochasticCredibilityMatrix():
 class ValuedCredibilityMatrix():
     def __init__(self, matrices: np.ndarray):
         self.matrix = np.asarray(matrices, dtype=float)
+        self.matrix = zero_diagonal(self.matrix)
         self.check_consisntency(self.matrix, matrices)
         
     def __len__(self):
