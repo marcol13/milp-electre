@@ -1,23 +1,26 @@
 import numpy as np
 from .const import RELATIONS
-from .utils import is_array, is_square, is_normalized, check_keys
-from .relations import PositivePreference, NegativePreference
+from .utils import is_array, is_square, is_normalized, check_keys, is_sum_one, is_the_same_array, zero_diagonal
 
-# TODO: Make factory class
+
 class CredibilityMatrix:
     def __init__(self, matrix: np.ndarray):
-        self.check_consistency(matrix)
-        self.matrix = matrix
-
-    def get_size(self):
+        self.matrix = np.asarray(matrix, dtype=int)
+        self.matrix = zero_diagonal(self.matrix)
+        self.check_consistency(self.matrix, matrix)
+    
+    def __len__(self):
         return self.matrix.shape[0]
+    
+    def __repr__(self) -> str:
+        return f"{self.matrix}"
 
-    def check_consistency(self, matrix):
+    def check_consistency(self, matrix, original_matrix):
         try:
             is_array(matrix)
             is_square(matrix)
             is_normalized(matrix)
-            # TODO: check if it is integer matrix
+            is_the_same_array(matrix, original_matrix)
         except ValueError:
             raise
 
@@ -25,38 +28,48 @@ class CredibilityMatrix:
 class StochasticCredibilityMatrix():
     def __init__(self, matrices: np.ndarray):
         self.matrix = matrices
+        for key in matrices:
+            self.matrix[key] = np.asarray(matrices[key], dtype=float)
+            self.matrix[key] = zero_diagonal(self.matrix[key])
+        self.check_consistency(self.matrix, matrices)
+
+    def __len__(self):
+        return self.matrix[RELATIONS[0]].shape[0]
         
-    def check_consistency(self, matrices):
+    def __repr__(self) -> str:
+        return f"{self.matrix}"
+
+    def check_consistency(self, matrices, original_matrices):
         try:
-            for matrix in matrices.values():
+            for matrix, org_matrix in zip(matrices.values(), original_matrices.values()):
                 is_array(matrix)
                 is_square(matrix)
                 is_normalized(matrix)
-                # TODO: Check if it is float matrix
-                # TODO: Check if it sum to 1
+                is_the_same_array(matrix, org_matrix)
             check_keys(matrices, RELATIONS)
+            values = np.array([matrix for matrix in matrices.values()])
+            is_sum_one(values, len(self))
         except ValueError:
             raise
-
-    def get_size(self):
-        return self.matrix[RELATIONS[0]].shape[0]
     
+
 class ValuedCredibilityMatrix():
     def __init__(self, matrices: np.ndarray):
-        self.matrix = matrices
+        self.matrix = np.asarray(matrices, dtype=float)
+        self.matrix = zero_diagonal(self.matrix)
+        self.check_consistency(self.matrix, matrices)
         
-    def check_consistency(self, matrix):
+    def __len__(self):
+        return self.matrix.shape[0]
+
+    def __repr__(self) -> str:
+        return f"{self.matrix}"
+
+    def check_consistency(self, matrix, original_matrix):
         try:
             is_array(matrix)
             is_square(matrix)
             is_normalized(matrix)
-            # TODO: Check if float 32
-            # TODO: Check if min 0 and max 1
+            is_the_same_array(matrix, original_matrix)
         except ValueError:
             raise
-
-    def get_size(self):
-        return self.matrix.shape[0]
-    
-    def get_reversed_matrix(self):
-        return self.matrix.T
