@@ -1,18 +1,22 @@
 import numpy as np
 
+from helpers import get_relation, get_relation_score
+
 def kendall_distance(x, y):
     shape = x.shape
     assert shape == y.shape
     if shape == None:
-        return 1.0
-    x = np.asarray(x)
-    y = np.asarray(y)
+        raise ValueError("Matrices must be an numpy 2d array")
     distance = 0
     for i in range(shape[0]):
         for j in range(shape[1]):
-            distance += abs(x[i, j] - y[i, j])
+            if i == j:
+                continue
+            rel_x = get_relation(x[i][j], x[j][i])
+            rel_y = get_relation(y[i][j], y[j][i])
+            distance += get_relation_score(rel_x, rel_y)
     
-    distance *= 1/2
+    distance *= 1/8
     return distance
 
 def kendall_tau(distance, n):
