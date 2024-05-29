@@ -4,6 +4,7 @@ from enum import Enum
 RELATIONS = [PositivePreference, NegativePreference, Incomparible, Indifference]
 PARTIAL_OUTPUT = "outranking"
 COMPLETE_OUTPUT = "p"
+INPUT_TYPES = ["crisp", "valued", "stochastic"]
 
 class RankingMode(Enum):
     PARTIAL = "partial"

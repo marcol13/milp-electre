@@ -72,10 +72,6 @@ class Outranking(ABC):
     def init_complete(self, all_results: bool = False):
         pass
 
-    @abstractmethod
-    def create_table(self, all_results: bool = False):
-        pass
-
     def create_variables(self, relations: list[str]) -> dict:
         variables = dict()
         for relation in relations:
@@ -159,31 +155,3 @@ class Outranking(ABC):
             return Indifference
         else:
             return Incomparible
-        
-    def show_graph(self, all_results: bool = False):
-        if all_results:
-            for idx, result in enumerate(self.results):
-                graph = Graph(result, self.labels)
-                graph.show(f"temp_{idx}")
-        else:
-            graph = Graph(self.results[0], self.labels)
-            graph.show("temp")
-
-    def save_graph(self, all_results: bool = False, path: str = "temp"):
-        if all_results:
-            for idx, result in enumerate(self.results):
-                graph = Graph(result, self.labels)
-                graph.save(f"{path}_{idx}")
-        else:
-            graph = Graph(self.results[0], self.labels)
-            graph.save(path)
-
-    def show_table(self, all_results: bool = False):
-        plots = self.create_table(all_results)
-        for plot in plots:
-            plot.show()
-
-    def save_table(self, all_results: bool = False, path: str = "table"):
-        plots = self.create_table(all_results)
-        for idx, plot in enumerate(plots):
-            plot.save(f"{path}_{idx}")
