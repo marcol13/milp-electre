@@ -5,6 +5,7 @@ from ..core.relations import PositivePreference, NegativePreference, Indifferenc
 from ..core.types import RankingModeType
 from ..core.const import RankingMode, PARTIAL_OUTPUT, COMPLETE_OUTPUT
 from ..core.visualize.graph.graph import Graph
+from .ranking import Ranking
 from collections import defaultdict
 from itertools import permutations
 from abc import ABC, abstractmethod
@@ -155,3 +156,18 @@ class Outranking(ABC):
             return Indifference
         else:
             return Incomparible
+        
+    def get_rankings(self) -> list[Ranking]:
+        rankings = []
+        class_types_dict = {
+            "CrispOutranking": "crisp",
+            "ValuedElectreOutranking": "valued",
+            "ValuedPrometheeOutranking": "valued",
+            "StochasticOutranking": "stochastic",
+        }
+        input_type = class_types_dict[self.__class__.__name__]
+        for result in self.results:
+            print(result)
+            rankings.append(Ranking(input_type, result, self.credibility, self.labels, self.scores))
+        return rankings
+    
