@@ -1,16 +1,6 @@
-from .relations import PositivePreference, NegativePreference, Incomparible, Indifference
-from enum import Enum
+from mcdalp.core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 
-RELATIONS = [PositivePreference, NegativePreference, Incomparible, Indifference]
-PARTIAL_OUTPUT = "outranking"
-COMPLETE_OUTPUT = "p"
-INPUT_TYPES = ["crisp", "valued", "stochastic"]
-
-class RankingMode(Enum):
-    PARTIAL = "partial"
-    COMPLETE = "complete"
-
-DEFAULT_SCORETABLE = {
+score = {
     PositivePreference: {
         PositivePreference: 0,
         NegativePreference: 4,
@@ -35,4 +25,18 @@ DEFAULT_SCORETABLE = {
         Indifference: 2,
         Incomparible: 0
     }
+
 }
+
+def get_relation(a, b):
+    if a > b:
+        return PositivePreference
+    elif a < b:
+        return NegativePreference
+    elif a == b == 1:
+        return Indifference
+    else:
+        return Incomparible
+    
+def get_relation_score(rel_a, rel_b, score=score):
+    return score[rel_a][rel_b]

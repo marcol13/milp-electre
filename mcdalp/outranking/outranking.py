@@ -5,6 +5,7 @@ from ..core.relations import PositivePreference, NegativePreference, Indifferenc
 from ..core.types import RankingModeType
 from ..core.const import RankingMode, PARTIAL_OUTPUT, COMPLETE_OUTPUT
 from ..core.visualize.graph.graph import Graph
+from .ranking import Ranking
 from collections import defaultdict
 from itertools import permutations
 from abc import ABC, abstractmethod
@@ -70,10 +71,6 @@ class Outranking(ABC):
 
     @abstractmethod
     def init_complete(self, all_results: bool = False):
-        pass
-
-    @abstractmethod
-    def create_table(self, all_results: bool = False):
         pass
 
     def create_variables(self, relations: list[str]) -> dict:
@@ -160,30 +157,17 @@ class Outranking(ABC):
         else:
             return Incomparible
         
-    def show_graph(self, all_results: bool = False):
-        if all_results:
-            for idx, result in enumerate(self.results):
-                graph = Graph(result, self.labels)
-                graph.show(f"temp_{idx}")
-        else:
-            graph = Graph(self.results[0], self.labels)
-            graph.show("temp")
-
-    def save_graph(self, all_results: bool = False, path: str = "temp"):
-        if all_results:
-            for idx, result in enumerate(self.results):
-                graph = Graph(result, self.labels)
-                graph.save(f"{path}_{idx}")
-        else:
-            graph = Graph(self.results[0], self.labels)
-            graph.save(path)
-
-    def show_table(self, all_results: bool = False):
-        plots = self.create_table(all_results)
-        for plot in plots:
-            plot.show()
-
-    def save_table(self, all_results: bool = False, path: str = "table"):
-        plots = self.create_table(all_results)
-        for idx, plot in enumerate(plots):
-            plot.save(f"{path}_{idx}")
+    def get_rankings(self) -> list[Ranking]:
+        rankings = []
+        class_types_dict = {
+            "CrispOutranking": "crisp",
+            "ValuedElectreOutranking": "valued",
+            "ValuedPrometheeOutranking": "valued",
+            "StochasticOutranking": "stochastic",
+        }
+        input_type = class_types_dict[self.__class__.__name__]
+        for result in self.results:
+            print(result)
+            rankings.append(Ranking(input_type, result, self.credibility, self.labels, self.scores))
+        return rankings
+    

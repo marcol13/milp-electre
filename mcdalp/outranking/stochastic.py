@@ -27,12 +27,3 @@ class StochasticOutranking(Outranking):
         problem = self.add_contraints(RankingMode.COMPLETE, problem, variables, self.size, self.unique_permutations)
 
         return problem
-    
-    def create_table(self, all_results: bool = False):
-        if all_results:
-            for result in self.results:
-                table = StochasticTable(self.credibility, result, self.labels)
-                table.draw()
-        else:
-            table = StochasticTable(self.credibility, self.results[0], self.labels)
-            table.draw()
