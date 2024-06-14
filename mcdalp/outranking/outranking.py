@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 class Outranking(ABC):
     def __init__(self, credibility, scores, labels: list[str]):
         self.credibility = credibility.matrix
-        self.size = credibility.get_size()
+        self.size = len(credibility)
         self.scores = scores
         self.labels = labels
         self.problem = LpProblem("Maximize_support", LpMinimize)
