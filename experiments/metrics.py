@@ -1,6 +1,6 @@
 import numpy as np
 
-from helpers import get_relation, get_relation_score
+from experiments.helpers import get_relation, get_relation_score
 
 def kendall_distance(x, y):
     shape = x.shape

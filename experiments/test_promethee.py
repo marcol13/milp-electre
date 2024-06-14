@@ -5,7 +5,9 @@ from benchmarks.promethee_I import PrometheeI
 from mcdalp.outranking.valued_promethee import ValuedPrometheeOutranking
 from mcdalp.core.credibility import ValuedCredibilityMatrix
 from mcdalp.core.score import Score
-from metrics import kendall_tau, kendall_distance
+from mcdalp.outranking.ranking import Ranking
+from metrics import kendall_tau, kendall_distance, normalized_hit_ratio
+
 
 thresholds = {
     "indifference": 0.05,
@@ -26,15 +28,20 @@ vp_new.solve("partial", all_results=True)
 ranking = vp_new.get_rankings()
 print(ranking)
 
-pi_ranking = pi.method.rank().outranking_matrix.data.to_numpy()
+pi_outranking= pi.method.rank().outranking_matrix.data.to_numpy()
+pi_ranking = Ranking("valued", pi_outranking, c_matrix, ["a", "b", "c", "d", "e", "f", "g", "h"], score)
 # print(pi.method.rank().outranking_matrix.data)
 
 print("LOL")
 print(ranking[0].outranking)
-print(pi_ranking.shape, ranking[0].outranking.shape)
-distance = kendall_distance(pi_ranking, ranking[0].outranking)
-score = kendall_tau(distance, pi_ranking.shape[0])
+print(pi_ranking.outranking.shape, ranking[0].outranking.shape)
+distance = kendall_distance(pi_ranking.outranking, ranking[0].outranking)
+score = kendall_tau(distance, pi_ranking.outranking.shape[0])
 print(score)
+
+nhr = normalized_hit_ratio(pi_ranking, ranking[0])
+print(nhr)
+
 
 # print(vp_new.get_rankings())
 
