@@ -30,7 +30,6 @@ class Hasse:
             new_label = sep.join([labels[i] for i in indices])
             labels[idx] = new_label
         
-
         del_indices = sorted(list(del_indices))
         if len(del_indices) > 0:
             matrix = np.delete(matrix, del_indices, 0)
@@ -43,7 +42,7 @@ class Hasse:
     def __create_nodes(self, matrix: QuadraticArrayType, labels: list[str]) -> list[Node]:
         nodes = []
         for idx, label in enumerate(labels):
-            outranking_level = int(np.sum(matrix[idx]))
+            outranking_level = int(np.sum(matrix[:,idx]))
             nodes.append(Node(label, outranking_level))
         return nodes
 
