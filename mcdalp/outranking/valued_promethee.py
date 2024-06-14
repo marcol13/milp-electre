@@ -9,7 +9,7 @@ class ValuedPrometheeOutranking(Outranking):
         super().__init__(credibility, scores, labels)
         self.valued_credibility = self.credibility
 
-    def init_partial(self):
+    def init_partial(self, problem):
         variables = self.create_variables(["outranking", "pp", "pn", "i", "r"])
         reversed_matrix = self.valued_credibility.T
         problem_relations = [{"var": variables["pp"], "rel": PositivePreference}, {"var": variables["pn"], "rel": NegativePreference}, {"var": variables["i"], "rel": Indifference}, {"var": variables["r"], "rel": Incomparible}]
