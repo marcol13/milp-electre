@@ -18,7 +18,11 @@ class Ranking:
         self.scores = scores
 
         # add support and weaknesses, etc.
-        self.positions = np.sum(self.outranking, axis=1)
+        self.weakness = np.sum(self.outranking, axis=0) - np.diag(self.outranking)
+        self.strength = np.sum(self.outranking, axis=1) - np.diag(self.outranking)
+        self.quality = self.strength - self.weakness
+        self.outranked_variants = self.__get_outranked_variants_number()
+        self.leaders = np.where(self.outranked_variants == 0)
 
 
     def create_table(self) -> list[Table]:
@@ -35,4 +39,8 @@ class Ranking:
     def create_graph(self) -> Graph:
         return Graph(self.outranking, self.labels)
 
+    def __get_outranked_variants_number(self):
+        indifference_num = np.sum(np.logical_and(self.outranking.T, self.outranking), axis=0) - np.ones(self.outranking.shape[0])
+        outranked_variants = self.weakness - indifference_num
+        return outranked_variants
 

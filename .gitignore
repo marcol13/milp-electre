@@ -9,6 +9,7 @@ dist/
 pyElectreMILP.egg-info/
 .pytest_cache/
 examples/graphs/*
+graphs/
 
 # Files
 graph.html

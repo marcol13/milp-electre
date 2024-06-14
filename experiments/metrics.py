@@ -28,3 +28,9 @@ def max_rank_diff(size: int):
         return (size // 2) * size
     else:
         return -(size // -2) * (size - 1)
+
+def normalized_hit_ratio(r1, r2):
+    common_leaders = len(np.intersect1d(r1.leaders, r2.leaders))
+    all_leaders = len(np.union1d(r1.leaders, r2.leaders))
+
+    return common_leaders / all_leaders

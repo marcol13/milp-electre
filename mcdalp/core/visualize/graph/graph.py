@@ -20,6 +20,7 @@ class Graph(Hasse):
         for node in self.nodes:
             grouped_nodes[node.level].append(node)
 
+        print(grouped_nodes)
         for _, nodes in grouped_nodes.items():
             with self.G.subgraph() as s:
                 s.attr(rank='same')
