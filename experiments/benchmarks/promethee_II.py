@@ -5,7 +5,8 @@ from tqdm import tqdm
 from experiments.benchmarks.problem import ValuedProblem, SettingsType
 from experiments.metrics import kendall_tau, kendall_distance, normalized_hit_ratio
 from mcda.core.scales import QuantitativeScale, PreferenceDirection
-from mcda.outranking.promethee import Promethee1, VShapeFunction
+from mcda.core.relations import PreferenceStructure
+from mcda.outranking.promethee import Promethee2, VShapeFunction
 from mcda.core.matrices import PerformanceTable
 
 from mcdalp.core.credibility import ValuedCredibilityMatrix
@@ -23,12 +24,20 @@ class PrometheeII():
 
         self.functions = dict(zip(range(self.problem.criteria), [VShapeFunction(p=self.problem.thresholds["preference"], q=self.problem.thresholds["indifference"]) for _ in range(self.problem.criteria)]))
 
-        self.method = Promethee1(self.table, self.weights, self.functions)
+        self.method = Promethee2(self.table, self.weights, self.functions)
 
     def get_matrix(self):
         p_preferences = self.method.partial_preferences()
         preferences = self.method.preferences(p_preferences)
         return preferences.data
+    
+    def get_credibility(self):
+        rank = self.method.rank()
+        ps = PreferenceStructure()
+        # print(rank.labels)
+        transformed_rank = ps.from_ranking(rank)
+
+        return transformed_rank.outranking_matrix.data.to_numpy()
     
 
 def compare_promethee2(runs: int, settings: SettingsType):
@@ -39,23 +48,23 @@ def compare_promethee2(runs: int, settings: SettingsType):
         criteria_type = np.random.rand(settings["criteria"]) > settings["is_cost_threshold"]
 
         vp = ValuedProblem("test", settings["alternatives"], settings["criteria"], settings["thresholds"], criteria_type, labels)
-        promethee1 = PrometheeII(vp)
+        promethee2 = PrometheeII(vp)
 
         score = Score()
-        c_matrix = ValuedCredibilityMatrix(promethee1.get_matrix().to_numpy())
+        c_matrix = ValuedCredibilityMatrix(promethee2.get_matrix().to_numpy())
         
 
-        lp_promethee1 = ValuedPrometheeOutranking(c_matrix, score, labels)
-        lp_promethee1.solve(settings["mode"], all_results=settings["all_results"])
+        lp_promethee2 = ValuedPrometheeOutranking(c_matrix, score, labels)
+        lp_promethee2.solve(settings["mode"], all_results=settings["all_results"])
 
-        rank_lp_promethee1 = lp_promethee1.get_rankings()
-        rank_promethee1 = Ranking("valued", promethee1.method.rank().outranking_matrix.data.to_numpy(), c_matrix, labels, score)
+        rank_lp_promethee2 = lp_promethee2.get_rankings()
+        rank_promethee2 = Ranking("valued", promethee2.get_credibility(), c_matrix, labels, score)
 
         temp_results = []
-        for rank in rank_lp_promethee1:
-            distance = kendall_distance(rank.outranking, rank_promethee1.outranking)
+        for rank in rank_lp_promethee2:
+            distance = kendall_distance(rank.outranking, rank_promethee2.outranking)
             kendall = kendall_tau(distance, rank.outranking.shape[0])
-            nhr = normalized_hit_ratio(rank_promethee1, rank)
+            nhr = normalized_hit_ratio(rank_promethee2, rank)
             temp_results.append((kendall, nhr))
 
         temp_results = np.array(temp_results)
