@@ -1,7 +1,8 @@
 import string
 import numpy as np
 
-from experiments.metrics import kendall_tau, kendall_distance, normalized_hit_ratio
+from experiments.metrics import kendall_tau, kendall_distance, normalized_hit_ratio, rdm, second_kendall
+from tqdm import tqdm
 
 from mcda.outranking.promethee import Promethee1, Promethee2, VShapeFunction
 from mcda.core.matrices import AdjacencyValueMatrix, PerformanceTable
@@ -56,7 +57,7 @@ def binarize_netflow(netflow, threshold):
 
 def compare_netflow_score(runs: int, settings):
     results = []
-    for _ in range(runs):
+    for _ in tqdm(range(runs)):
         labels = list(string.ascii_lowercase[:settings["alternatives"]])
         netflow = np.random.rand(settings["alternatives"], settings["alternatives"])
         netflow = binarize_netflow(netflow, settings["binary_threshold"])
@@ -82,7 +83,9 @@ def compare_netflow_score(runs: int, settings):
             distance = kendall_distance(rank.outranking, rank_netflow.outranking)
             kendall = kendall_tau(distance, rank.outranking.shape[0])
             nhr = normalized_hit_ratio(rank_netflow, rank)
-            temp_results.append((kendall, nhr))
+            rank_difference = rdm(rank, rank_netflow, "partial")
+            sec_kendall = second_kendall(rank, rank_netflow)
+            temp_results.append((kendall, nhr, rank_difference, sec_kendall))
 
         temp_results = np.array(temp_results)
         results.append(np.average(temp_results, axis=0))
@@ -110,7 +113,7 @@ if __name__ == "__main__":
             "veto": 0.25
         },
         "is_cost_threshold": 0.5,
-        "mode": "complete",
+        "mode": "partial",
         "all_results": True,
         "binary_threshold": 0.5
     }

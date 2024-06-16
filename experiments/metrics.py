@@ -1,6 +1,8 @@
 import numpy as np
 
 from experiments.helpers import get_relation, get_relation_score
+from mcdalp.core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
+
 
 def kendall_distance(x, y):
     shape = x.shape
@@ -28,9 +30,42 @@ def max_rank_diff(size: int):
         return (size // 2) * size
     else:
         return -(size // -2) * (size - 1)
+    
+def get_preference(i: int, j: int):
+        if i > j:
+            return PositivePreference
+        elif j > i:
+            return NegativePreference
+        elif i == j == 1:
+            return Indifference
+        else:
+            return Incomparible
+    
+def rdm(r1, r2, mode="complete"):
+    assert r1.outranking.shape == r2.outranking.shape
+    # assert r1.scores == r2.scores
+
+    shape = r1.outranking.shape[0]
+
+    denom = 4 * shape * (shape - 1)
+    measure= 0
+    for i in range(shape):
+        for j in range(shape):
+            if i == j:
+                continue
+            r1_pref = get_preference(r1.outranking[i][j], r1.outranking[j][i])
+            r2_pref = get_preference(r2.outranking[i][j], r2.outranking[j][i])
+
+            measure += r1.scores.score_matrix[r1_pref][r2_pref]
+
+    return measure / denom
 
 def normalized_hit_ratio(r1, r2):
     common_leaders = len(np.intersect1d(r1.leaders, r2.leaders))
     all_leaders = len(np.union1d(r1.leaders, r2.leaders))
 
     return common_leaders / all_leaders
+
+def second_kendall(r1, r2):
+    rdm_score = rdm(r1, r2, "partial")
+    return 1 - 2 * rdm_score
