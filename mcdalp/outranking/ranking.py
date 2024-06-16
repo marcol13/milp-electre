@@ -40,7 +40,7 @@ class Ranking:
         return Graph(self.outranking, self.labels)
 
     def __get_outranked_variants_number(self):
-        indifference_num = np.sum(np.logical_and(self.outranking.T, self.outranking), axis=0) - np.ones(self.outranking.shape[0])
+        indifference_num = np.sum(np.logical_and(self.outranking.T, self.outranking), axis=0) - np.diag(self.outranking)
         outranked_variants = self.weakness - indifference_num
         return outranked_variants
 
