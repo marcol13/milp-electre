@@ -59,8 +59,8 @@ def compare_electre3(runs: int, settings: SettingsType):
 
         temp_results = []
         for rank in rank_lp_electre3:
-            distance = kendall_distance(rank.outranking, rank_electre3.outranking)
-            kendall = kendall_tau(distance, rank.outranking.shape[0])
+            distance = kendall_distance(rank.rank_matrix, rank_electre3.rank_matrix)
+            kendall = kendall_tau(distance, rank.rank_matrix.shape[0])
             nhr = normalized_hit_ratio(rank_electre3, rank)
             temp_results.append((kendall, nhr))
 

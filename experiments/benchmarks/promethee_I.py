@@ -53,8 +53,8 @@ def compare_promethee1(runs: int, settings: SettingsType):
 
         temp_results = []
         for rank in rank_lp_promethee1:
-            distance = kendall_distance(rank.outranking, rank_promethee1.outranking)
-            kendall = kendall_tau(distance, rank.outranking.shape[0])
+            distance = kendall_distance(rank.rank_matrix, rank_promethee1.rank_matrix)
+            kendall = kendall_tau(distance, rank.rank_matrix.shape[0])
             nhr = normalized_hit_ratio(rank_promethee1, rank)
             rdm_measure = rdm(rank, rank_promethee1, settings["mode"])
             temp_results.append((kendall, nhr, rdm_measure))

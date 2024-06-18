@@ -86,8 +86,8 @@ def compare_netflow_score(runs: int, settings):
 
         temp_results = []
         for rank in rank_lp_netflow:
-            distance = kendall_distance(rank.outranking, rank_netflow.outranking)
-            kendall = kendall_tau(distance, rank.outranking.shape[0])
+            distance = kendall_distance(rank.rank_matrix, rank_netflow.rank_matrix)
+            kendall = kendall_tau(distance, rank.rank_matrix.shape[0])
             nhr = normalized_hit_ratio(rank_netflow, rank)
             rank_difference = rdm(rank, rank_netflow, "partial")
             temp_results.append((kendall, nhr, rank_difference))
