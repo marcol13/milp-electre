@@ -3,7 +3,7 @@ import numpy as np
 
 from tqdm import tqdm
 from experiments.benchmarks.problem import ValuedProblem, SettingsType
-from experiments.metrics import kendall_tau, kendall_distance, normalized_hit_ratio
+from experiments.metrics import kendall_tau, kendall_distance, normalized_hit_ratio, rdm
 from mcda.core.scales import QuantitativeScale, PreferenceDirection
 from mcda.outranking.promethee import Promethee1, VShapeFunction
 from mcda.core.matrices import PerformanceTable
@@ -56,7 +56,8 @@ def compare_promethee1(runs: int, settings: SettingsType):
             distance = kendall_distance(rank.outranking, rank_promethee1.outranking)
             kendall = kendall_tau(distance, rank.outranking.shape[0])
             nhr = normalized_hit_ratio(rank_promethee1, rank)
-            temp_results.append((kendall, nhr))
+            rdm_measure = rdm(rank, rank_promethee1, settings["mode"])
+            temp_results.append((kendall, nhr, rdm_measure))
 
         temp_results = np.array(temp_results)
         results.append(np.average(temp_results, axis=0))

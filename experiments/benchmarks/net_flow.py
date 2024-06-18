@@ -66,6 +66,8 @@ def compare_netflow_score(runs: int, settings):
         netflowscore_method = None
         if settings["mode"] == "partial":
             netflowscore_method = NetFlowScorePartial(netflow, scales, weights, settings["thresholds"])
+            # pass
+            
         elif settings["mode"] == "complete":
             netflowscore_method = NetFlowScoreComplete(netflow, scales, weights, settings["thresholds"])
 
@@ -76,7 +78,11 @@ def compare_netflow_score(runs: int, settings):
         lp_netflowscore.solve(settings["mode"], all_results=settings["all_results"])
 
         rank_lp_netflow = lp_netflowscore.get_rankings()
+        
+        # temp = np.random.rand(settings["alternatives"], settings["alternatives"])
+        # temp = binarize_netflow(temp, settings["binary_threshold"])
         rank_netflow = LpRanking("crisp", netflowscore_method.get_rank(), c_matrix, labels, score)
+        # rank_netflow = LpRanking("crisp", temp, c_matrix, labels, score)
 
         temp_results = []
         for rank in rank_lp_netflow:
@@ -84,8 +90,7 @@ def compare_netflow_score(runs: int, settings):
             kendall = kendall_tau(distance, rank.outranking.shape[0])
             nhr = normalized_hit_ratio(rank_netflow, rank)
             rank_difference = rdm(rank, rank_netflow, "partial")
-            sec_kendall = second_kendall(rank, rank_netflow)
-            temp_results.append((kendall, nhr, rank_difference, sec_kendall))
+            temp_results.append((kendall, nhr, rank_difference))
 
         temp_results = np.array(temp_results)
         results.append(np.average(temp_results, axis=0))
