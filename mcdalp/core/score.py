@@ -4,7 +4,7 @@ from .types import ScoreType, RelationType
 from .const import RELATIONS, DEFAULT_SCORETABLE
 from .utils import check_monotonicity, check_keys
 
-class Score:
+class Score(object):
     def __init__(self, score_matrix: ScoreType=DEFAULT_SCORETABLE):
         self.validate(score_matrix)
         self.score_matrix = score_matrix
@@ -29,3 +29,8 @@ class Score:
                     raise ValueError("Score values for the same relations are different.")
                 
         check_monotonicity(score, DEFAULT_SCORETABLE)
+
+    def __eq__(self, other: object):
+        if not isinstance(other, Score):
+            return NotImplemented
+        return self.score_matrix == other.score_matrix

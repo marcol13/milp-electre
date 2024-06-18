@@ -167,7 +167,6 @@ class Outranking(ABC):
         }
         input_type = class_types_dict[self.__class__.__name__]
         for result in self.results:
-            print(result)
             rankings.append(Ranking(input_type, result, self.credibility, self.labels, self.scores))
         return rankings
     
