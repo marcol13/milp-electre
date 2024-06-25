@@ -33,6 +33,15 @@ class Problem():
     def _generate_outranking(self):
         matrix = np.random.rand(self.alternatives, self.criteria)
         return matrix
+    
+    def generate_weights(self, n: int):
+        bins = np.random.random_sample(n-1)
+        bins = np.append(bins, 0)
+        bins = np.append(bins, 1)
+        bins.sort()
+        weights = np.diff(bins)
+        return weights
+
 
 class BinaryProblem(Problem):
     def __init__(self, name: str, alternatives: int, criteria: int, thresholds: ThresholdType, is_cost: list[bool], labels: list[str], binary_threshold: float):
