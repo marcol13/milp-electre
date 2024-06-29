@@ -1,10 +1,12 @@
 import numpy as np
+import numpy.typing as npt
 
 from experiments.helpers import get_relation, get_relation_score
 from mcdalp.outranking.ranking import Ranking
+from mcdalp.core.types import RankingMode
 
 class Metrics:
-    def __init__(self, r1: Ranking, r2: Ranking):
+    def __init__(self, r1: Ranking, r2: Ranking, mode: RankingMode = "partial"):
         assert r1.size == r2.size
         assert r1.rank_matrix.shape == r2.rank_matrix.shape
         assert r1.scores == r2.scores
@@ -12,6 +14,7 @@ class Metrics:
         self.r1 = r1
         self.r2 = r2
         self.size = r1.size
+        self.mode = mode
 
     def kendall_tau(self):
         distance = self.__calculate_kendall_distance(self.r1.rank_matrix, self.r2.rank_matrix)
@@ -40,7 +43,7 @@ class Metrics:
 
         return measure / (2 * self.size * (self.size - 1))
    
-    def __calculate_kendall_distance(self, x, y):
+    def __calculate_kendall_distance(self, x: npt.ArrayLike, y: npt.ArrayLike):
         shape = x.shape
         assert shape == y.shape
         if shape == None:
@@ -62,3 +65,17 @@ class Metrics:
             return (size // 2) * size
         else:
             return -(size // -2) * (size - 1)
+        
+    def make_measurement(self):
+        if self.mode == "partial":
+            return {
+                "normalized_rank_difference": self.normalized_rank_difference(),
+                "normalized_hit_ratio": self.normalized_hit_ratio(),
+                "rank_difference": self.rank_difference_measure(),
+            }
+        else:
+            return {
+                "kendall_tau": self.kendall_tau(),
+                "normalized_hit_ratio": self.normalized_hit_ratio(),
+                "rank_difference": self.rank_difference_measure(),
+            }

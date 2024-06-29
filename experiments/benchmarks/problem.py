@@ -1,22 +1,6 @@
-from typing import NamedTuple, Tuple
 import numpy as np
 
-from mcdalp.core.types import RankingMode
-
-
-
-class ThresholdType(NamedTuple):
-    indifference: float
-    preference: float
-    veto: float
-
-class SettingsType(NamedTuple):
-    thresholds: ThresholdType
-    alternatives: int
-    criteria: int
-    is_cost_threshold: float
-    mode: RankingMode
-    all_results: bool
+from experiments.core.types import ThresholdType
 
 class Problem():
     def __init__(self, name: str, alternatives: int, criteria: int, thresholds: ThresholdType, is_cost: list[bool], labels=list[str]):
@@ -41,6 +25,10 @@ class Problem():
         bins.sort()
         weights = np.diff(bins)
         return weights
+    
+    def create_dict(self, data):
+        assert len(data) == self.criteria
+        return dict(zip(range(self.criteria), data))
 
 
 class BinaryProblem(Problem):

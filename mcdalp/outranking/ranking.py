@@ -15,7 +15,7 @@ class Ranking:
     def __init__(self, input_type: InputType, rank_matrix: npt.ArrayLike, outranking: Union[npt.ArrayLike, None] = None, labels: Union[list[str], None] = None, scores: Score = Score()):
         self.input_type = input_type
         self.rank_matrix = rank_matrix
-        self.outranking = outranking if outranking != None else rank_matrix
+        self.outranking = outranking if outranking is not None else rank_matrix
         self.size = rank_matrix.shape[0]
         self.labels = labels if labels != None else list(string.ascii_letters[:self.size])
         self.scores = scores
