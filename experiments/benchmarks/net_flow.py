@@ -1,7 +1,10 @@
 import string
 import numpy as np
 
-from experiments.metrics import kendall_tau, kendall_distance, normalized_hit_ratio, rdm, second_kendall
+from experiments.metrics import Metrics
+from experiments.benchmarks.electre_III import ElectreIII
+from experiments.benchmarks.problem import ValuedProblem
+from experiments.core.test_data import generate_test_data
 from tqdm import tqdm
 
 from mcda.outranking.promethee import Promethee1, Promethee2, VShapeFunction
@@ -18,7 +21,6 @@ from mcdalp.outranking.ranking import Ranking as LpRanking
 class NetFlowScorePartial(Promethee1):
     def __init__(self, netflow, scales, weights, thresholds):
         self.netflow = AdjacencyValueMatrix(netflow)
-        # self.functions = {0: VShapeFunction(p=thresholds["preference"], q=thresholds["indifference"])}
         self.functions = dict(zip(range(netflow.shape[0]), [VShapeFunction(p=thresholds["preference"], q=thresholds["indifference"]) for _ in range(netflow.shape[0])]))
         self.performance_table = PerformanceTable(netflow, scales=scales)
 
@@ -52,6 +54,7 @@ class NetFlowScoreComplete(Promethee2):
         transformed_rank = ps.from_ranking(ranking)
         return transformed_rank.outranking_matrix.data.to_numpy()
 
+
 def binarize_netflow(netflow, threshold):
     return np.where(netflow > threshold, 1, 0)
 
@@ -59,69 +62,55 @@ def compare_netflow_score(runs: int, settings):
     results = []
     for _ in tqdm(range(runs)):
         labels = list(string.ascii_lowercase[:settings["alternatives"]])
-        netflow = np.random.rand(settings["alternatives"], settings["alternatives"])
-        netflow = binarize_netflow(netflow, settings["binary_threshold"])
-        scales = {0: QuantitativeScale(0, 1, PreferenceDirection.MIN)}
-        weights = {0: 1}
-        netflowscore_method = None
-        if settings["mode"] == "partial":
-            netflowscore_method = NetFlowScorePartial(netflow, scales, weights, settings["thresholds"])
-            # pass
-            
-        elif settings["mode"] == "complete":
-            netflowscore_method = NetFlowScoreComplete(netflow, scales, weights, settings["thresholds"])
+        criteria_type = np.random.rand(settings["criteria"]) > settings["is_cost_threshold"]
 
+        vp = ValuedProblem("test", settings["alternatives"], settings["criteria"], settings["thresholds"], criteria_type, labels)
+        electre3 = ElectreIII(vp)
+
+        credibility = electre3.get_matrix()
+        credibility = binarize_netflow(credibility, settings["binary_threshold"])
+
+        NetFlowScoreMethod = NetFlowScorePartial if settings["mode"] == "partial" else NetFlowScoreComplete
+        netflow = NetFlowScoreMethod(credibility, electre3.scale, electre3.weights, vp.thresholds)
+        
         score = Score()
-        c_matrix = CredibilityMatrix(netflow)
+        c_matrix = CredibilityMatrix(credibility)
 
         lp_netflowscore = CrispOutranking(c_matrix, score, labels)
         lp_netflowscore.solve(settings["mode"], all_results=settings["all_results"])
 
-        rank_lp_netflow = lp_netflowscore.get_rankings()
-        
-        # temp = np.random.rand(settings["alternatives"], settings["alternatives"])
-        # temp = binarize_netflow(temp, settings["binary_threshold"])
-        rank_netflow = LpRanking("crisp", netflowscore_method.get_rank(), c_matrix, labels, score)
-        # rank_netflow = LpRanking("crisp", temp, c_matrix, labels, score)
+        # In experiments there is checked only the first ranking
+        rank_lp_netflow = lp_netflowscore.get_rankings()[0]
+        rank_netflow = LpRanking("crisp", netflow.get_rank(), c_matrix, labels, score)
 
-        temp_results = []
-        for rank in rank_lp_netflow:
-            distance = kendall_distance(rank.rank_matrix, rank_netflow.rank_matrix)
-            kendall = kendall_tau(distance, rank.rank_matrix.shape[0])
-            nhr = normalized_hit_ratio(rank_netflow, rank)
-            rank_difference = rdm(rank, rank_netflow, "partial")
-            temp_results.append((kendall, nhr, rank_difference))
+        metrics = Metrics(rank_lp_netflow, rank_netflow, settings["mode"])
+        results.append(metrics.make_measurement())
 
-        temp_results = np.array(temp_results)
-        results.append(np.average(temp_results, axis=0))
-
-    return np.array(results)
+    return results
 
 if __name__ == "__main__":
-    # from mcda.core.scales import QuantitativeScale, PreferenceDirection
+    # settings = {
+    #     "alternatives": 8,
+    #     "criteria": 5,
+    #     "thresholds": {
+    #         "indifference": 0.05,
+    #         "preference": 0.15,
+    #         "veto": 0.25
+    #     },
+    #     "is_cost_threshold": 0.5,
+    #     "mode": "partial",
+    #     "all_results": True,
+    #     "binary_threshold": 0.5
+    # }
 
-    # is_cost = [True, True, False, False]
-    # netflow = np.array([[1, 0, 1, 0, 0], [0, 1, 0, 0, 1], [1, 1, 1, 0, 0], [0, 0, 0, 1, 1], [1, 0, 1, 0, 1]])
-    # scales = {0: QuantitativeScale(0, 1, PreferenceDirection.MIN)}
-    # weights = {0: 1}
-    # thresholds = {"preference": 0.5, "indifference": 0.2}
-
-    # score = NetFlowScorePartial(netflow, scales, weights, thresholds)
-    # score = NetFlowScoreComplete(netflow, scales, weights, thresholds)
-    # print(score.get_rank())
-    settings = {
-        "alternatives": 8,
-        "criteria": 5,
-        "thresholds": {
-            "indifference": 0.05,
-            "preference": 0.15,
-            "veto": 0.25
-        },
+    default_values = {
         "is_cost_threshold": 0.5,
         "mode": "partial",
-        "all_results": True,
-        "binary_threshold": 0.5
+        "all_results": False
     }
 
-    metrics = compare_netflow_score(10, settings)
-    print(metrics)
+    settings_list = generate_test_data(["alternatives", "criteria", "thresholds", "binary_threshold"], default_values)
+
+    for setting in settings_list:
+        metrics = compare_netflow_score(10, setting)
+        print(metrics)
