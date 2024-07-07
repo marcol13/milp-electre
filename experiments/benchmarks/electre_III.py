@@ -8,12 +8,15 @@ from experiments.metrics import Metrics
 from experiments.core.test_data import generate_test_data
 from mcda.core.scales import QuantitativeScale, PreferenceDirection
 from mcda.outranking.electre import Electre3
-from mcda.core.matrices import PerformanceTable
+from mcda.core.matrices import PerformanceTable, AdjacencyValueMatrix
+from mcda.outranking.promethee import net_outranking_flows
+from mcda.core.relations import PreferenceStructure, Ranking
+
 
 from mcdalp.core.credibility import ValuedCredibilityMatrix
 from mcdalp.core.score import Score
 from mcdalp.outranking.valued_electre import ValuedElectreOutranking
-from mcdalp.outranking.ranking import Ranking
+from mcdalp.outranking.ranking import Ranking as LpRanking
 
 
 class ElectreIII():
@@ -39,10 +42,9 @@ class ElectreIII():
         credibility = self.method.credibility()
         return credibility.data
     
-    def get_credibility(self):
-        credibility = self.method.credibility()
-
-        return credibility.data.to_numpy()
+    def get_ranking(self):
+        final_rank = self.method.rank()
+        return final_rank.data.to_numpy()
     
 
 def compare_electre3(runs: int, settings: SettingsValuedType):
@@ -62,7 +64,25 @@ def compare_electre3(runs: int, settings: SettingsValuedType):
 
         # In experiments there is checked only the first ranking
         rank_lp_electre3 = lp_electre3.get_rankings()[0]
-        rank_electre3 = Ranking("valued", electre3.get_credibility(), c_matrix, labels, score)
+
+        if settings["mode"] == "partial":
+            rank_electre3 = LpRanking("valued", electre3.get_ranking(), c_matrix, labels, score)
+        else:
+            credibility = electre3.get_matrix()
+            netflow = AdjacencyValueMatrix(credibility)
+            outranking_flows = net_outranking_flows(netflow)
+            ranking = Ranking(outranking_flows)
+            ps = PreferenceStructure()
+            transformed_rank = ps.from_ranking(ranking)
+            rank_electre3 = LpRanking("crisp", transformed_rank.outranking_matrix.data.to_numpy(), c_matrix, labels, score)
+
+            # TU SKOŃCZYŁEM!!!!!
+
+            # flow = self.flows(self.netflow)
+            # ranking = Ranking(flow)
+            # ps= PreferenceStructure()
+            # transformed_rank = ps.from_ranking(ranking)
+            # transformed_rank.outranking_matrix.data.to_numpy()
 
         metrics = Metrics(rank_lp_electre3, rank_electre3, settings["mode"])
         results.append(metrics.make_measurement())
@@ -85,7 +105,7 @@ if __name__ == "__main__":
 
     default_values = {
         "is_cost_threshold": 0.5,
-        "mode": "partial",
+        "mode": "complete",
         "all_results": False
     }
 
