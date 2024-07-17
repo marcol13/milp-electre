@@ -36,6 +36,8 @@ class ElectreIII():
 
         self.table = PerformanceTable(self.problem.data, scales=self.scale, alternatives=self.problem.labels)
 
+        print(self.table.data)
+        print(self.table)
         self.method = Electre3(self.table, self.weights, self.I, self.P, self.V)
 
     def get_matrix(self):
@@ -46,45 +48,55 @@ class ElectreIII():
         final_rank = self.method.rank()
         return final_rank.data.to_numpy()
     
+def compare_electre3(vp: ValuedProblem, settings: SettingsValuedType) -> Metrics:
+    electre3 = ElectreIII(vp)
 
-def compare_electre3(runs: int, settings: SettingsValuedType):
+    score = Score()
+    c_matrix = ValuedCredibilityMatrix(electre3.get_matrix().to_numpy())
+
+    print(c_matrix)
+    
+    lp_electre3 = ValuedElectreOutranking(c_matrix, score, vp.labels)
+    lp_electre3.solve(settings["mode"], all_results=settings["all_results"])
+
+    # In experiments there is checked only the first ranking
+    rank_lp_electre3 = lp_electre3.get_rankings()[0]
+    print(rank_lp_electre3.rank_matrix)
+    rank_lp_electre3.create_graph().show()
+
+    if settings["mode"] == "partial":
+        rank_electre3 = LpRanking("valued", electre3.get_ranking(), c_matrix, vp.labels, score)
+        print(rank_electre3.rank_matrix)
+        rank_electre3.create_graph().show()
+    else:
+        credibility = electre3.get_matrix()
+        netflow = AdjacencyValueMatrix(credibility)
+        outranking_flows = net_outranking_flows(netflow)
+        ranking = Ranking(outranking_flows)
+        ps = PreferenceStructure()
+        transformed_rank = ps.from_ranking(ranking)
+        rank_electre3 = LpRanking("crisp", transformed_rank.outranking_matrix.data.to_numpy(), c_matrix, vp.labels, score)
+
+        # TU SKOŃCZYŁEM!!!!!
+
+        # flow = self.flows(self.netflow)
+        # ranking = Ranking(flow)
+        # ps= PreferenceStructure()
+        # transformed_rank = ps.from_ranking(ranking)
+        # transformed_rank.outranking_matrix.data.to_numpy()
+
+    return Metrics(rank_lp_electre3, rank_electre3, settings["mode"])
+    
+
+def make_experiments(runs: int, settings: SettingsValuedType) -> list[Metrics]:
     results = []
     for _ in tqdm(range(runs)):
         labels = list(string.ascii_lowercase[:settings["alternatives"]])
         criteria_type = np.random.rand(settings["criteria"]) > settings["is_cost_threshold"]
 
         vp = ValuedProblem("test", settings["alternatives"], settings["criteria"], settings["thresholds"], criteria_type, labels)
-        electre3 = ElectreIII(vp)
-
-        score = Score()
-        c_matrix = ValuedCredibilityMatrix(electre3.get_matrix().to_numpy())
         
-        lp_electre3 = ValuedElectreOutranking(c_matrix, score, labels)
-        lp_electre3.solve(settings["mode"], all_results=settings["all_results"])
-
-        # In experiments there is checked only the first ranking
-        rank_lp_electre3 = lp_electre3.get_rankings()[0]
-
-        if settings["mode"] == "partial":
-            rank_electre3 = LpRanking("valued", electre3.get_ranking(), c_matrix, labels, score)
-        else:
-            credibility = electre3.get_matrix()
-            netflow = AdjacencyValueMatrix(credibility)
-            outranking_flows = net_outranking_flows(netflow)
-            ranking = Ranking(outranking_flows)
-            ps = PreferenceStructure()
-            transformed_rank = ps.from_ranking(ranking)
-            rank_electre3 = LpRanking("crisp", transformed_rank.outranking_matrix.data.to_numpy(), c_matrix, labels, score)
-
-            # TU SKOŃCZYŁEM!!!!!
-
-            # flow = self.flows(self.netflow)
-            # ranking = Ranking(flow)
-            # ps= PreferenceStructure()
-            # transformed_rank = ps.from_ranking(ranking)
-            # transformed_rank.outranking_matrix.data.to_numpy()
-
-        metrics = Metrics(rank_lp_electre3, rank_electre3, settings["mode"])
+        metrics = compare_electre3(vp, settings)
         results.append(metrics.make_measurement())
 
     return results
@@ -105,12 +117,12 @@ if __name__ == "__main__":
 
     default_values = {
         "is_cost_threshold": 0.5,
-        "mode": "complete",
+        "mode": "partial",
         "all_results": False
     }
 
     settings_list = generate_test_data(["alternatives", "criteria", "thresholds"], default_values)
 
     for setting in settings_list:
-        metrics = compare_electre3(10, setting)
+        metrics = make_experiments(10, setting)
         print(metrics)
