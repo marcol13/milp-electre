@@ -1,7 +1,11 @@
+import json
+import time
 import string
 import numpy as np
 
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+
 from experiments.benchmarks.problem import ValuedProblem
 from experiments.metrics import Metrics
 from experiments.core.test_data import generate_test_data
@@ -24,6 +28,7 @@ class PrometheeI():
         # self.scale = dict(zip(range(self.problem.criteria), [QuantitativeScale(0, 1, PreferenceDirection.MIN if is_cost else PreferenceDirection.MAX ) for is_cost in self.problem.is_cost]))
         # self.weights = dict(zip(range(self.problem.criteria), [1 for _ in range(self.problem.criteria)]))
 
+        self.time = 0
         self.table = PerformanceTable(self.problem.data, scales=self.scale, alternatives=self.problem.labels)
         self.functions = dict(zip(range(self.problem.criteria), [VShapeFunction(p=self.problem.thresholds["preference"], q=self.problem.thresholds["indifference"]) for _ in range(self.problem.criteria)]))
 
@@ -34,30 +39,69 @@ class PrometheeI():
         preferences = self.method.preferences(p_preferences)
         return preferences.data
     
+    def get_ranking(self):
+        start_time = time.time()
+        final_rank = self.method.rank()
+        self.time = time.time() - start_time
+        return final_rank.outranking_matrix.data.to_numpy()
+    
 
 def compare_promethee1(runs: int, settings: SettingsValuedType):
-    results = []
-    for _ in tqdm(range(runs)):
+    labels = list(string.ascii_lowercase[:settings["alternatives"]])
+    criteria_type = np.random.rand(settings["criteria"]) > settings["is_cost_threshold"]
+
+    vp = ValuedProblem("test", settings["alternatives"], settings["criteria"], settings["thresholds"], criteria_type, labels)
+    promethee1 = PrometheeI(vp)
+
+    score = Score()
+    c_matrix = ValuedCredibilityMatrix(promethee1.get_matrix().to_numpy())
+
+    lp_promethee1 = ValuedPrometheeOutranking(c_matrix, score, labels)
+    lp_promethee1.solve(settings["mode"], all_results=settings["all_results"])
+
+    # In experiments there is checked only the first ranking
+    rank_lp_promethee1 = lp_promethee1.get_rankings()[0]
+    rank_promethee1 = Ranking("valued", promethee1.get_ranking(), c_matrix, labels, score)
+
+    metrics = Metrics(rank_lp_promethee1, rank_promethee1, settings["mode"])
+    return metrics, promethee1.time, lp_promethee1.time
+
+def make_experiments(runs: int, settings: SettingsValuedType) -> list[Metrics]:
+    def run_experiment(_):
         labels = list(string.ascii_lowercase[:settings["alternatives"]])
         criteria_type = np.random.rand(settings["criteria"]) > settings["is_cost_threshold"]
 
         vp = ValuedProblem("test", settings["alternatives"], settings["criteria"], settings["thresholds"], criteria_type, labels)
-        promethee1 = PrometheeI(vp)
+        
+        metrics, time_comp, time_lp = compare_promethee1(vp, settings)
+        return {**metrics.make_measurement(), "time_comp": time_comp, "time_lp": time_lp}
 
-        score = Score()
-        c_matrix = ValuedCredibilityMatrix(promethee1.get_matrix().to_numpy())
+    results = []
+    timeout = 120  # Czas limitu ustawiony na 2 minuty (120 sekund)
 
-        lp_promethee1 = ValuedPrometheeOutranking(c_matrix, score, labels)
-        lp_promethee1.solve(settings["mode"], all_results=settings["all_results"])
-
-        # In experiments there is checked only the first ranking
-        rank_lp_promethee1 = lp_promethee1.get_rankings()[0]
-        rank_promethee1 = Ranking("valued", promethee1.method.rank().outranking_matrix.data.to_numpy(), c_matrix, labels, score)
-
-        metrics = Metrics(rank_lp_promethee1, rank_promethee1, settings["mode"])
-        results.append(metrics.make_measurement())
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(run_experiment, _) for _ in range(runs)]
+        
+        for future in as_completed(futures):
+            try:
+                result = future.result(timeout=timeout)
+                results.append(result)
+            except TimeoutError:
+                print(f"Zadanie przekroczyło limit czasu {timeout} sekund i zostało przerwane.")
+                # Możesz dodać dodatkowe działania, np. rejestrowanie nieudanych prób.
 
     return results
+
+def process_setting(n, setting):
+    metrics = make_experiments(n, setting)
+    return {
+        "alternatives": setting["alternatives"],
+        "criteria": setting["criteria"],
+        "thresholds": setting["thresholds"],
+        "is_cost_threshold": setting["is_cost_threshold"],
+        "mode": setting["mode"],
+        "measurements": metrics
+    }
 
 if __name__ == "__main__":
     # settings = {
@@ -81,6 +125,19 @@ if __name__ == "__main__":
 
     settings_list = generate_test_data(["alternatives", "criteria", "thresholds"], default_values)
 
-    for setting in settings_list:
-        metrics = compare_promethee1(10, setting)
-        print(metrics)
+    # settings_list = settings_list[:10]
+    results = []
+
+    with ProcessPoolExecutor(max_workers=8) as executor:
+        future_to_setting = {executor.submit(process_setting, 100, setting): setting for setting in settings_list}
+        
+        for future in as_completed(future_to_setting):
+            result = future.result()
+            print(result)
+            results.append(result)
+
+    with open("experiments/data/prometheeI/partial.json", "w") as f:
+        json.dump(results, f)
+    # for setting in settings_list:
+    #     metrics = compare_promethee1(10, setting)
+    #     print(metrics)
