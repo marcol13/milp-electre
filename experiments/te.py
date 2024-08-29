@@ -1,5 +1,5 @@
 import numpy as np
-from metrics import kendall_tau, kendall_distance
+from experiments.metrics import kendall_tau, kendall_distance
 from mcdalp.outranking.ranking import Ranking
 
 matrix_a = np.array([[0,1,1],[0,0,1],[0,0,0]])

@@ -1,5 +1,5 @@
 import numpy as np
-from pulp import LpVariable, LpInteger, LpProblem, LpMinimize, LpStatus, lpSum
+from pulp import LpVariable, LpInteger, LpProblem, LpMinimize, LpStatus, lpSum, PULP_CBC_CMD
 from pulp.constants import LpStatusOptimal
 from ..core.relations import PositivePreference, NegativePreference, Indifference, Incomparible
 from ..core.types import RankingModeType
@@ -50,7 +50,7 @@ class Outranking(ABC):
         if all_results:
             prev_objective_value = None
             while True:
-                problem.solve()
+                problem.solve(PULP_CBC_CMD(msg=0))
                 if problem.status == LpStatusOptimal and (prev_objective_value is None or problem.objective.value() <= prev_objective_value):
                     prev_objective_value = problem.objective.value()
                     result_matrix = self.get_outranking(problem, self.outranking_matrix)
@@ -59,7 +59,7 @@ class Outranking(ABC):
                 else:
                     break
         else:
-            problem.solve()
+            problem.solve(PULP_CBC_CMD(msg=0))
             result_matrix = self.get_outranking(problem, self.outranking_matrix)
             results.append(result_matrix)
 
@@ -167,7 +167,6 @@ class Outranking(ABC):
         }
         input_type = class_types_dict[self.__class__.__name__]
         for result in self.results:
-            print(result)
             rankings.append(Ranking(input_type, result, self.credibility, self.labels, self.scores))
         return rankings
     
