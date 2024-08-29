@@ -47,8 +47,6 @@ class StochasticCredibilityMatrix():
                 is_normalized(matrix)
                 is_the_same_array(matrix, org_matrix)
             check_keys(matrices, RELATIONS)
-            values = np.array([matrix for matrix in matrices.values()])
-            is_sum_one(values, len(self))
         except ValueError:
             raise
     

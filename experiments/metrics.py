@@ -24,7 +24,7 @@ class Metrics:
     def rank_difference_measure(self):
         rank_diff = np.abs(self.r1.positions - self.r2.positions)
 
-        return np.sum(rank_diff) / self.__max_rank_diff(self.size)
+        return 1 - np.sum(rank_diff) / self.__max_rank_diff(self.size)
 
     def normalized_hit_ratio(self):
         common_leaders = len(np.intersect1d(self.r1.leaders, self.r2.leaders))

@@ -26,8 +26,6 @@ class PrometheeII():
         self.problem = problem
         self.scale = self.problem.create_dict([QuantitativeScale(0, 1, PreferenceDirection.MIN if is_cost else PreferenceDirection.MAX ) for is_cost in self.problem.is_cost])
         self.weights = self.problem.create_dict(self.problem.generate_weights(self.problem.criteria))
-        # self.scale = dict(zip(range(self.problem.criteria), [QuantitativeScale(0, 1, PreferenceDirection.MIN if is_cost else PreferenceDirection.MAX ) for is_cost in self.problem.is_cost]))
-        # self.weights = dict(zip(range(self.problem.criteria), [1 for _ in range(self.problem.criteria)]))
         
         self.time = 0
         self.table = PerformanceTable(self.problem.data, scales=self.scale, alternatives=self.problem.labels)
@@ -63,12 +61,10 @@ def compare_promethee2(runs: int, settings: SettingsValuedType):
     lp_promethee2 = ValuedPrometheeOutranking(c_matrix, score, labels)
     lp_promethee2.solve(settings["mode"], all_results=settings["all_results"])
     
-    # In experiments there is checked only the first ranking
     rank_lp_promethee2 = lp_promethee2.get_rankings()[0]
     rank_promethee2 = Ranking("valued", promethee2.get_credibility(), c_matrix, labels, score)
 
     metrics = Metrics(rank_lp_promethee2, rank_promethee2, settings["mode"])
-    # results.append(metrics.make_measurement())
     return metrics, promethee2.time, lp_promethee2.time
 
 def make_experiments(runs: int, settings: SettingsValuedType) -> list[Metrics]:
@@ -82,7 +78,7 @@ def make_experiments(runs: int, settings: SettingsValuedType) -> list[Metrics]:
         return {**metrics.make_measurement(), "time_comp": time_comp, "time_lp": time_lp}
 
     results = []
-    timeout = 120  # Czas limitu ustawiony na 2 minuty (120 sekund)
+    timeout = 120
 
     with ThreadPoolExecutor() as executor:
         futures = [executor.submit(run_experiment, _) for _ in range(runs)]
@@ -92,8 +88,7 @@ def make_experiments(runs: int, settings: SettingsValuedType) -> list[Metrics]:
                 result = future.result(timeout=timeout)
                 results.append(result)
             except TimeoutError:
-                print(f"Zadanie przekroczyło limit czasu {timeout} sekund i zostało przerwane.")
-                # Możesz dodać dodatkowe działania, np. rejestrowanie nieudanych prób.
+                print(f"Task exceed {timeout} seconds.")
 
     return results
 
@@ -109,19 +104,6 @@ def process_setting(n, setting):
     }
 
 if __name__ == "__main__":
-    # settings = {
-    #     "alternatives": 8,
-    #     "criteria": 5,
-    #     "thresholds": {
-    #         "indifference": 0.05,
-    #         "preference": 0.15,
-    #         "veto": 0.25
-    #     },
-    #     "is_cost_threshold": 0.5,
-    #     "mode": "complete",
-    #     "all_results": True
-    # }
-
     default_values = {
         "is_cost_threshold": 0.5,
         "mode": "complete",
@@ -129,7 +111,6 @@ if __name__ == "__main__":
     }
 
     settings_list = generate_test_data(["alternatives", "criteria", "thresholds"], default_values)
-    # settings_list = settings_list[:10]
 
     results = []
 
@@ -143,7 +124,3 @@ if __name__ == "__main__":
 
     with open("experiments/data/prometheeII/complete.json", "w") as f:
         json.dump(results, f)
-
-    # for setting in settings_list:
-    #     metrics = compare_promethee2(10, setting)
-    #     print(metrics)

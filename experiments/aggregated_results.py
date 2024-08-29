@@ -2,18 +2,18 @@ import json
 
 import numpy as np
 
-def merge_all_data():
-    files = ["experiments/data/electreIII/complete.json", "experiments/data/electreIII/partial.json", "experiments/data/prometheeI/partial.json", "experiments/data/prometheeII/complete.json", "experiments/data/netflow/completev2.json", "experiments/data/netflow/final_partial.json"]
-    complete_files = ["experiments/data/electreIII/complete.json", "experiments/data/prometheeII/complete.json", "experiments/data/netflow/completev2.json"]
-    partial_files = ["experiments/data/electreIII/partial.json", "experiments/data/prometheeI/partial.json", "experiments/data/netflow/final_partial.json"]
-    crisp_files = ["experiments/data/netflow/final_partial.json", "experiments/data/netflow/completev2.json"]
-    output_path = "experiments/data/crisp_aggregated_results.json"
+files = ["experiments/data/electreIII/complete.json", "experiments/data/electreIII/partial.json", "experiments/data/prometheeI/partial.json", "experiments/data/prometheeII/complete.json", "experiments/data/netflow/completev2.json", "experiments/data/netflow/final_partial.json"]
+complete_files = ["experiments/data/electreIII/complete.json", "experiments/data/prometheeII/complete.json", "experiments/data/netflow/completev2.json"]
+partial_files = ["experiments/data/electreIII/partial.json", "experiments/data/prometheeI/partial.json", "experiments/data/netflow/final_partial.json"]
+crisp_files = ["experiments/data/netflow/final_partial.json", "experiments/data/netflow/completev2.json"]
+
+def merge_all_data(input_files: list[str] = files, output_path: str = "experiments/data/aggregated_results.json"):
     first_item = True
 
     with open(output_path, "w") as out:
         out.write("[\n")
 
-        for file in crisp_files:
+        for file in input_files:
             with open(file, "r") as f:
                 data = json.load(f)
 

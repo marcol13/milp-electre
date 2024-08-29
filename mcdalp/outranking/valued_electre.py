@@ -18,10 +18,8 @@ class ValuedElectreOutranking(Outranking):
 
         positive_preference_matrix = np.minimum(self.valued_credibility, 1 - reversed_matrix)
         negative_preference_matrix = np.minimum(reversed_matrix, 1 - self.valued_credibility)
-        # indifference_matrix = np.minimum(self.valued_credibility, reversed_matrix)
-        indifference_matrix = np.maximum(self.valued_credibility + reversed_matrix - 1, 0)
-        # incomparible_matrix = np.minimum(1 - self.valued_credibility, 1 - reversed_matrix)
-        incomparible_matrix = np.maximum(1 - self.valued_credibility - reversed_matrix, 0)
+        indifference_matrix = np.minimum(self.valued_credibility, reversed_matrix)
+        incomparible_matrix = np.minimum(1 - self.valued_credibility, 1 - reversed_matrix)
 
         problem_relations = [{"var": variables["pp"], "rel": PositivePreference}, {"var": variables["pn"], "rel": NegativePreference}, {"var": variables["i"], "rel": Indifference}, {"var": variables["r"], "rel": Incomparible}]
         valued_relations = [{"var": positive_preference_matrix, "rel": PositivePreference}, {"var": negative_preference_matrix, "rel": NegativePreference}, {"var": indifference_matrix, "rel": Indifference}, {"var": incomparible_matrix, "rel": Incomparible}]
