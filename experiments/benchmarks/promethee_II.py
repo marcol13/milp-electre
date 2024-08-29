@@ -3,7 +3,6 @@ import time
 import json
 import numpy as np
 
-from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from experiments.benchmarks.problem import ValuedProblem
