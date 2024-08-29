@@ -1,4 +1,4 @@
-from mcdalp.core.types import RankingMode    
+from mcdalp.core.types import RankingModeType    
 from itertools import product
 
 test_thresholds = {

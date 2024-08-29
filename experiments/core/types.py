@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from mcdalp.core.types import RankingMode
+from mcdalp.core.types import RankingModeType
 
 
 class ThresholdType(NamedTuple):

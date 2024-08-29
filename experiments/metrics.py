@@ -3,7 +3,7 @@ import numpy.typing as npt
 
 from experiments.helpers import get_relation, get_relation_score
 from mcdalp.outranking.ranking import Ranking
-from mcdalp.core.types import RankingMode
+from mcdalp.core.types import RankingModeType
 
 class Metrics:
     def __init__(self, r1: Ranking, r2: Ranking, mode: RankingMode = "partial"):
